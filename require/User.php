@@ -1,6 +1,6 @@
 <?php
 
-class User{
+class User extends Model{
 
     $con;
     $user_id;

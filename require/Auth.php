@@ -2,17 +2,11 @@
 
 class Auth extends Model{
 
-    const $credential_limit = 10;//minute
-    const $access_key_limit = 30;//minute
+    const CREDENTIAL_LIMIT = 3;//minute
+    const ACCESS_KEY_LIMIT = 30;//minute
 
     function __construct($con){
-        $this->con = $con;
-        $client_id = $this->get_param(CLIENT_ID, false);
-        if($this->client_id === false){
-            error(400, 'client_id');
-        }else{
-            $this->client = $this->con->fetch('SELECT * FROM `app` WHERE `client_id` = ?', $client_id);
-        }
+        parent::__construct($con);
     }
 
     function check_client($arg){
@@ -37,14 +31,15 @@ class Auth extends Model{
     function update_key($client_id){
     }
 
-    function access($access_key){
+    function access($access_key, &$user_id, &$client_id){
         $access_key = $this->con->fetch('SELECT COUNT(`id`), `status`, `user_id` WHERE `access_key` = ?', $access_key);
         if($access_key['COUNT(`id`)'] !== '1'){
             error(400, 'wrong access_key');
         }else if($access_key['status'] === '1'){
             error(400, 'old access_key');
         }else{
-            return array('user_id'=>$access_key['user_id'], 'app_id'=>$access_key['app_id']);
+            $user_id = $access_key['user_id'];
+            $client_id = $access_key['id'];
         }
     }
 
