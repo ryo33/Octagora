@@ -568,13 +568,13 @@ class Message extends Model{
         $hash = sha256($tag . 'Ryo');
         $length = strlen(parent::$id_characters);
         $tag = '';
-        for($i = 0; $i < 8; $i++){
+        for($i = 0; $i < 8; $i ++){
             $number = $num = hexdec(substr($hash, $i * 8, 8));
             while(true){
-                $tag .= parent::$id_characters[($num + $number % $length) % $length];
+                $tag .= parent::$id_characters[($num) % $length];
                 $num = (int)($num / $length);
-                if($num == 0){
-                    return;
+                if($num === 0){
+                    break;
                 }
             }
         }

@@ -10,12 +10,13 @@ define('DIR', dirname(__FILE__) . '/');
 define('REQ', DIR . '/require/');
 define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"]);
 
-require REQ . 'EasySql.php';
 require REQ . 'function.php';
 require DIR . 'setting.php';
-require REQ . 'Request.php';
-require REQ . 'Model.php';
-require REQ . 'Response.php';
+require DIR . 'ClassLoader.php';
+
+$loader = new ClassLoader();
+$loader->register_directory('require');
+$loader->register();
 
 define('LAST', 'l');
 define('START', 's');
@@ -30,12 +31,31 @@ define('CLIENT_SECRET', 'client_secret');
 define('ACCESS_TOKEN', 'access_token');
 define('ERROR', 'error');
 
+define('ACTION', 'action');
+define('TOKEN', '_Token');
+
 $con = new EasySql($database_dsn, $database_username, $database_password);
 $req = new Request();
 $res = new Response();
+$tmpl = new Template();
+$se = new Session();
+$user = new User($con);
 
 try{
     ob_start();
+
+    if($se->check_login($user)){
+        $tmpl->add_navbar(<<<BUTTON
+    <li class=""><a class="uk-float-right" href="{$_(URL)}/users?action=logout">Logout</a></li>
+BUTTON
+        );
+    }else{
+        $tmpl->add_navbar(<<<BUTTON
+    <li class=""><a class="uk-float-right" href="{$_(URL)}/users">Login</a></li>
+BUTTON
+        );
+    }
+
     switch($req->get_uri()){
     case 'api':
         $is_api = true;
@@ -80,6 +100,8 @@ function error($status, $message, $log=false){
         $json['status'] = "$status";
         $json['message'] = "$message";
         $res->content = [json_encode($json)];
+    }else{
+        redirect(URL);
     }
     if($log !== false || !$is_api){
         $con->insert('error_log', array('status', 'message', 'text', 'created'), array($status, $message, $log, now()->format('Y:m:d H:i:s')));

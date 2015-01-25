@@ -54,30 +54,30 @@ function redirect($url){
 }
 
 function get_token($form_name){
+    global $_SESSION;
     $key = 'csrf_tokens/' . $form_name;
     $tokens = isset($_SESSION[$key]) ? $_SESSION[$key] : array();
     if(count($tokens) >= 10){
         array_shift($tokens);
     }
-    $token = sha1($form_name . session_id() . microtime());
-    $tokens[] = $token;
-
-    $_SESSION[$key]=$tokens;
-
-    return sha256($token);
+    if(! is_array($tokens)){
+        $tokens = [];
+    }
+    $tokens[] = $token = sha256($form_name . session_id() . microtime() . 'BOSE');
+    $_SESSION[$key] = $tokens;
+    return $token;
 }
 
 function check_token($form_name, $token){
-
+    global $_SESSION;
     $key = 'csrf_tokens/' . $form_name;
     $tokens = isset($_SESSION[$key]) ? $_SESSION[$key] : array();
-
     if(false !== ($pos = array_search($token, $tokens, true))){
         unset($tokens[$pos]);
-        $_SESSION[$key] = sha1($tokens);
-        return true;
+        $_SESSION[$key] = $tokens;
+        return false;
     }
-    return false;
+    return true;
 }
 
 function sha256($target) {

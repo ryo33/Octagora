@@ -16,7 +16,7 @@ class Model{
             for($i = 0; $i < self::ID_LENGTH; $i ++){
                 $result .= self::$id_characters[mt_rand(0, strlen(self::$id_characters) - 1)];
             }
-        }while($this->con->fetch('SELECT COUNT(`id`) FROM `' . $table . '` WHERE `' . $column . '` = BINARY ?', $result) === '1');
+        }while($this->is_exists_id($table, $result, $column));
         return $result;
     }
 
@@ -27,6 +27,13 @@ class Model{
             $values[] = $now->format('Y:m:d H:i:s');
         }
         return $this->con->insert($table, $columns, $values, true);
+    }
+
+    function is_exists_id($table, $id, $column='id'){
+        if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `' . $table . '` WHERE `' . $column . '` = BINARY ?', $id) === '1'){
+            return true;
+        }
+        return false;
     }
 
 }

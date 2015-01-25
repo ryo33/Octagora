@@ -31,9 +31,9 @@ class Auth extends Model{
     function update_key($client_id){
     }
 
-    function access($access_key, &$user_id, &$client_id){
-        $access_key = $this->con->fetch('SELECT COUNT(`id`), `status`, `user_id` WHERE `access_key` = ?', $access_key);
-        if($access_key['COUNT(`id`)'] !== '1'){
+    function access($access_token, &$user_id, &$client_id){
+        $access = $this->con->fetch('SELECT COUNT(`id`), `status`, `user_id` FROM `access_token` WHERE `access_key` = ?', $access_token);
+        if($access['COUNT(`id`)'] !== '1'){
             error(400, 'wrong access_key');
         }else if($access_key['status'] === '1'){
             error(400, 'old access_key');

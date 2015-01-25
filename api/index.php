@@ -1,6 +1,5 @@
 <?php
 
-require REQ . 'Auth.php';
 $auth = new Auth($con);
 
 $json = ['status'=>200];
@@ -12,10 +11,16 @@ case 'token':
     require DIR . 'api/token/index.php';
     quit();
 case '1':
-//    $auth->access($user_id, $client_id);
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
     require DIR . 'api/1/index.php';
+    break;
+case false:
+    $is_api = false;
+    require DIR . 'api/top.php';
     break;
 default:
     error(400, 'version');
 }
-$res->content[] = json_encode($json);
+if($is_api){
+    $res->content[] = json_encode($json);
+}

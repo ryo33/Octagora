@@ -37,5 +37,7 @@ case 'messages':
 case 'users':
     break;
 default:
-    error(400, 'uri');
+    $is_api = false;
+    require DIR . 'api/1/top.php';
+    break;
 }
