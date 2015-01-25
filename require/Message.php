@@ -446,6 +446,38 @@ class Message extends Model{
                 error(400, 'special tag not_used');
             }
             break;
+        case $this->tag_types_key['length']:
+            if(check_numeric($escaped_tag, false, self::TEXT_MAX)){
+                error(400, 'length');
+            }
+            break;
+        case $this->tag_types_key['year']:
+            if(check_numeric($escaped_tag, 4)){
+                error(400, 'year');
+            }
+            break;
+        case $this->tag_types_key['month']:
+            if(check_numeric($escaped_tag, 2, 12)){
+                error(400, 'month');
+            }
+            break;
+        case $this->tag_types_key['day']:
+            if(check_numeric($escaped_tag, 2, 31)){
+                error(400, 'day');
+            }
+            break;
+        case $this->tag_types_key['hour']:
+            if(check_numeric($escaped_tag, 2, 23)){
+                error(400, 'hour');
+            }
+            break;
+        case $this->tag_types_key['minute']:
+            if(check_numeric($escaped_tag, 2, 59)){
+                error(400, 'hour');
+            }
+            break;
+        case $this->tag_types_key['application']:
+            break;
         }
         $result = $this->con->fetch('SELECT COUNT(`id`), `id` FROM `tag` WHERE `text` = BINARY ? AND `type` = ?', array($escaped_tag, $type));
         if($result['COUNT(`id`)'] !== '0'){

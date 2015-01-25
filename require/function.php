@@ -1,5 +1,13 @@
 <?php
 
+function check_numeric($text, $length=false, $max=false){
+    $num = (int)$text;
+    if(ctype_digit($text) && $num !== 0 && ($max === false ? true : ($num <= $max)) && strlen($text) !== 0 && ($length === false ? true : (strlen($text) === $length))){
+        return false;
+    }
+    return true;
+}
+
 $_ = function($a){
     return $a;
 };
