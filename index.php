@@ -8,6 +8,7 @@ mb_http_output('UTF-8');
 
 define('DIR', dirname(__FILE__) . '/');
 define('REQ', DIR . '/require/');
+define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"]);
 
 require REQ . 'EasySql.php';
 require REQ . 'function.php';
@@ -16,17 +17,17 @@ require REQ . 'Request.php';
 require REQ . 'Model.php';
 require REQ . 'Response.php';
 
-define('LAST', 'last');
-define('START', 'start');
-define('LENGTH', 'length');
-define('REQUEST', 'r');
+define('LAST', 'l');
+define('START', 's');
+define('LENGTH', 'm');
 define('TAGS', 'ts');
-define('TAGS_OPTION', 'tso');
+define('TAGS_OPTION', 'tn');
 define('TEXT', 't');
-define('NEEDS', 'needs');
-define('ORDER', 'order');
+define('NEEDS', 'n');
+define('ORDER', 'o');
 define('CLIENT_ID', 'client_id');
 define('CLIENT_SECRET', 'client_secret');
+define('ACCESS_TOKEN', 'access_token');
 define('ERROR', 'error');
 
 $con = new EasySql($database_dsn, $database_username, $database_password);

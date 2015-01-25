@@ -2,4 +2,4 @@ Options -Indexes
 IndexIgnore *
 DirectoryIndex index.php
 RewriteEngine on
-RewriteRule ^.*$ index.php
+RewriteRule !\.(js|ico|html|css)$ index.php

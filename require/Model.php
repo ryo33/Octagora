@@ -1,22 +1,22 @@
-﻿<?php
+<?php
 
 class Model{
 
     const ID_LENGTH = 16;
+    public static $id_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!#$%&()~=~|{}`*+_?><,./;]:[@^-\'"\\';
 
     function __construct($con){
         global $_SERVER;
         $this->con = $con;
-        $this->id_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!#$%&()~=~|{}`*+_?><,./;]:[@^-\'"\\';
     }
 
-    function create_id($table){
+    function create_id($table, $column='id'){
         do{
             $result = '';
             for($i = 0; $i < self::ID_LENGTH; $i ++){
-                $result .= $this->id_characters[mt_rand(0, strlen($this->id_characters) - 1)];
+                $result .= self::$id_characters[mt_rand(0, strlen(self::$id_characters) - 1)];
             }
-        }while($this->con->fetch('SELECT COUNT(`id`) FROM `' . $table . '` WHERE `id` = ?', $result) === '1');
+        }while($this->con->fetch('SELECT COUNT(`id`) FROM `' . $table . '` WHERE `' . $column . '` = BINARY ?', $result) === '1');
         return $result;
     }
 

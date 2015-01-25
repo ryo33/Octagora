@@ -1,21 +1,26 @@
-﻿<?php
+<?php
 
 class Message extends Model{
 
     const TAG_MAX = 256;
     const TEXT_MAX = 16384;
+    private $and = '*';
+    private $or = '.';
+    private $not = '!';
+    private $xor = '_';
 
     function __construct($con){
         parent::__construct($con);
         $this->tag_types = array(
-            'normal',
-            'year', 'month', 'day',
-            'hour', 'minute',
-            'by_user', 'to_user', 'user',
-            'message', 'to_message',
-            'length',
-            'application',
-            'not_used'
+            0=>'normal',
+            1=>'year', 2=>'month', 3=>'day',
+            4=>'hour', 5=>'minute',
+            6=>'by_user', 7=>'to_user', 8=>'user',
+            9=>'message', 10=>'to_message',
+            11=>'length',
+            12=>'application',
+            13=>'not_used',
+            14=>'hash'
         );
         foreach($this->tag_types as $i=>$tag_type){
             $this->tag_types_key[$tag_type] = $i;
@@ -26,6 +31,7 @@ class Message extends Model{
             $this->tag_types_key['to_message'],
             $this->tag_types_key['message'],
             $this->tag_types_key['normal'],
+            $this->tag_types_key['hash'],
         );
     }
 
@@ -48,7 +54,7 @@ class Message extends Model{
             case 'c':
                 if(in_array('created', $selects)){
                     error(400, 'needs');
-                }
+                }                     ;
                 $selects[] = 'created';
                 break;
             }
@@ -104,7 +110,7 @@ class Message extends Model{
                 if(count($types) === 0){
                     error(400, 'tag option');
                 }
-                $tags = $this->con->fetchAll('SELECT `type`, `text` FROM `tag` WHERE `id` in (SELECT `tag_id` FROM `tagging` WHERE `message_id` = ?) AND `type` in (\'' . implode('\', \'', $types) . '\')', $message['id']);
+                $tags = $this->con->fetchAll('SELECT `type`, `text` FROM `tag` WHERE `id` in (SELECT `tag_id` FROM `tagging` WHERE `message_id` = BINARY ?) AND `type` in (\'' . implode('\', \'', $types) . '\') ORDER BY `id`', $message['id']);
                 $json['ts'] = array();
                 foreach($tags as $tag){
                     $json['ts'][] = $tag['type'] === '0' ? $tag['text'] : $this->tag_types[$tag['type']] . ':' . $tag['text'];
@@ -146,7 +152,7 @@ class Message extends Model{
 
     function get_message(&$json, $id, $needs, $tso){
         $selects = $this->format_selects($needs, 'COUNT(`id`)');
-        $message = $this->con->fetch('SELECT ' . $selects . ' FROM `message` WHERE `id` = ?', $id);
+        $message = $this->con->fetch('SELECT ' . $selects . ' FROM `message` WHERE `id` = BINARY ?', $id);
         if($message['COUNT(`id`)'] !== '1'){
             error(400, 'message_id');
         }
@@ -165,7 +171,7 @@ class Message extends Model{
         $error = false;
         foreach($tokens as $token){
             if($before_is_and){
-                if($token === '&' or $token === '|' or $token === '^' or $token === '~' or $token === '(' or $token === ')'){
+                if($token === $this->and or $token === $this->or or $token === $this->xor or $token === $this->not or $token === '(' or $token === ')'){
                     error(400, 'tags');
                     break;
                 }else{
@@ -176,7 +182,7 @@ class Message extends Model{
                 }
                 $before_is_and = false;
             }else{
-                if($token === '&'){
+                if($token === $this->and){
                     $before_is_and = true;
                 }else{
                     error(400, 'tags');
@@ -250,30 +256,29 @@ class Message extends Model{
                 }
             }else{
                 if(!$before_escape){
-                    if($c === '&'){
+                    if($c === $this->and){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = '&';
-                    }else if($c === '|'){
+                        $result[] = $this->and;
+                    }else if($c === $this->or){
+                        if(strlen($tag) !== 0){
+                            $result[] = $tag;
+                            $tag = ''; }
+                        $result[] = $this->or;
+                    }else if($c === $this->xor){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = '|';
-                    }else if($c === '^'){
+                        $result[] = $this->xor;
+                    }else if($c === $this->not){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = '^';
-                    }else if($c === '~'){
-                        if(strlen($tag) !== 0){
-                            $result[] = $tag;
-                            $tag = '';
-                        }
-                        $result[] = '~';
+                        $result[] = $this->not;
                     }else if($c === '('){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
@@ -293,10 +298,10 @@ class Message extends Model{
                     }
                 }else{
                     switch($c){
-                    case '&':
-                    case '|':
-                    case '^':
-                    case '~':
+                    case $this->and:
+                    case $this->or:
+                    case $this->xor:
+                    case $this->not:
                     case '(':
                     case ')':
                     case ':':
@@ -328,27 +333,27 @@ class Message extends Model{
         $last_is_tag = false;
         $last = '';
         foreach($tags as $i=>$tag){
-            if($tag === '&'){
+            if($tag === $this->and){
                 if(!$last_is_tag and $last !== ')'){
                     error(400, 'tag');
                 }
                 $last_is_tag = false;
                 $last_is_not = false;
-            }else if($tag === '|'){
-                if(!$last_is_tag and $last !== ')'){
-                    error(400, 'tag');
-                    return true;
-                }
-                $last_is_tag = false;
-                $last_is_not = false;
-            }else if($tag === '^'){
+            }else if($tag === $this->or){
                 if(!$last_is_tag and $last !== ')'){
                     error(400, 'tag');
                     return true;
                 }
                 $last_is_tag = false;
                 $last_is_not = false;
-            }else if($tag === '~'){
+            }else if($tag === $this->xor){
+                if(!$last_is_tag and $last !== ')'){
+                    error(400, 'tag');
+                    return true;
+                }
+                $last_is_tag = false;
+                $last_is_not = false;
+            }else if($tag === $this->not){
                 if($last === ')'){
                     error(400, 'tag');
                     return true;
@@ -390,11 +395,11 @@ class Message extends Model{
     function check_message_id($tag){
         if(mb_strlen($tag) === parent::ID_LENGTH){
             for($i = 0; $i < parent::ID_LENGTH; $i ++){
-                if(strpos($this->id_characters, $tag[$i]) === false){
+                if(strpos(parent::$id_characters, $tag[$i]) === false){
                     error(400, 'special tag message_id');
                 }
             }
-            if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `message` WHERE `id` = ?', $tag) !== '1'){
+            if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `message` WHERE `id` = BINARY ?', $tag) !== '1'){
                 error(400, 'special tag message_id');
             }
         }else{
@@ -406,11 +411,11 @@ class Message extends Model{
     function check_user_id($tag){
         if(mb_strlen($tag) === parent::ID_LENGTH){
             for($i = 0; $i < parent::ID_LENGTH; $i ++){
-                if(strpos($this->id_characters, $tag[$i]) === false){
+                if(strpos(parent::$id_characters, $tag[$i]) === false){
                     error(400, 'special tag user_id');
                 }
             }
-            if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `user` WHERE `id` = ?', $tag) !== '1'){
+            if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `user` WHERE `id` = BINARY ?', $tag) !== '1'){
             error(400, 'special tag user_id');
             }
         }else{
@@ -420,11 +425,7 @@ class Message extends Model{
     }
 
     function get_tag_id($tag, &$type, $post=false){
-        //check tag length
-        if(mb_strlen($tag) > self::TAG_MAX){
-            error(400, 'tag length');
-        }
-        $escaped_tag = $this->escape_tag($tag, $type);
+        $escaped_tag = $this->escape_tag($tag, $type, $post);
         //check tag type is allowed
         if($post and ! in_array($type, $this->allow_post_tag_types)){
             error(400, 'tag not allowed tag type \'' . $this->tag_types[$type] . '\'');
@@ -446,7 +447,7 @@ class Message extends Model{
             }
             break;
         }
-        $result = $this->con->fetch('SELECT COUNT(`id`), `id` FROM `tag` WHERE `text` = ? AND `type` = ?', array($escaped_tag, $type));
+        $result = $this->con->fetch('SELECT COUNT(`id`), `id` FROM `tag` WHERE `text` = BINARY ? AND `type` = ?', array($escaped_tag, $type));
         if($result['COUNT(`id`)'] !== '0'){
             return $result['id'];
         }else{
@@ -457,24 +458,37 @@ class Message extends Model{
     function get_tags_where($tags){
         $result = '';
         $tag_ids = array();
-        foreach($tags as $tag){
-            if($tag === '|'){
-                $result .= ' OR ';
-            }else if($tag === '^'){
-                $result .= ' XOR ';
-            }else if($tag === '&'){
-                $result .= ' AND ';
-            }else if($tag === '~'){
+        $before_is_not = false;
+        $add_not = function()use(&$before_is_not, &$result){
+            if($before_is_not){
+                $before_is_not = false;
                 $result .= 'NOT ';
+            }
+        };
+        foreach($tags as $tag){
+            if($tag === $this->or){
+                $result .= ' OR ';
+                $add_not();
+            }else if($tag === $this->xor){
+                $result .= ' XOR ';
+                $add_not();
+            }else if($tag === $this->and){
+                $result .= ' AND ';
+            }else if($tag === $this->not){
+                $add_not();
+                $before_is_not = true;
             }else if($tag === '('){
                 $result .= '(';
+                $add_not();
             }else if($tag === ')'){
                 $result .= ')';
+                $add_not();
             }else{
-                if(substr($result, -1, 1) !== '~'){
-                    $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` = ?)';
-                }else{
+                if($before_is_not){
                     $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` != ?)';
+                    $before_is_not = false;
+                }else{
+                    $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` = ?)';
                 }
                 $tag_ids[] = $tag;
             }
@@ -482,7 +496,7 @@ class Message extends Model{
         return array($result, $tag_ids);
     }
 
-    function escape_tag($tag, &$rtype){
+    function escape_tag($tag, &$rtype, $post=false){
         $result = $tag;
         $rtype = 0;
         foreach($this->tag_types as $i=>$type){
@@ -500,6 +514,38 @@ class Message extends Model{
         if(substr_count($result, ':') !== $count){
             error(400, 'tag escape \':\'');
         }
+        //check tag length
+        if(strlen($tag) === 0 || mb_strlen($tag) > self::TAG_MAX){
+            error(400, 'tag length');
+        }
+        if($rtype === $this->tag_types_key['hash']){
+            if($post !== false){
+                $this->hash_tag($result);
+            }else{
+                for($i = 0, $count = strlen($result); $i < $count; $i ++){
+                    if(strpos(parent::$id_characters, $result[$i]) === false){
+                        error(400, 'special tag hash');
+                    }
+                }
+            }
+        }
         return $result;
     }
+
+    function hash_tag(&$tag){
+        $hash = sha256($tag . 'Ryo');
+        $length = strlen(parent::$id_characters);
+        $tag = '';
+        for($i = 0; $i < 8; $i++){
+            $number = $num = hexdec(substr($hash, $i * 8, 8));
+            while(true){
+                $tag .= parent::$id_characters[($num + $number % $length) % $length];
+                $num = (int)($num / $length);
+                if($num == 0){
+                    return;
+                }
+            }
+        }
+    }
+
 }

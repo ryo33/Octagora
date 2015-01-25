@@ -12,6 +12,7 @@ DESC;
     }
 
     function display(){
+        global $_;
         $display[] = <<<HEAD
 <!DOCTYPE html>
 <html>
@@ -21,6 +22,9 @@ DESC;
 <meta charset="utf-8">
 <meta name="description" content="{$this->description}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{$_(URL)}/uikit.almost-flat.min.css">
+<script src="{$_(URL)}/jquery.js"></script>
+<script src="{$_(URL)}/uikit.min.js"></script>
 </head>
 <body>
 HEAD;

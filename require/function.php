@@ -1,5 +1,9 @@
 <?php
 
+$_ = function($a){
+    return $a;
+};
+
 function h($text){
     return htmlspecialchars($text, ENT_QUOTES, 'EUC-JP');
 }
