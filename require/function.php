@@ -49,7 +49,7 @@ function echoh($text){
 }
 
 function redirect($url){
-    header("Location: " . $url);
+    header("Location: " . URL . $url);
     exit();
 }
 
@@ -77,7 +77,7 @@ function check_token($form_name, $token){
         $_SESSION[$key] = $tokens;
         return false;
     }
-    return true;
+    redirect(URL);
 }
 
 function sha256($target) {

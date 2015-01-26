@@ -8,7 +8,7 @@ mb_http_output('UTF-8');
 
 define('DIR', dirname(__FILE__) . '/');
 define('REQ', DIR . '/require/');
-define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"]);
+define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
 
 require REQ . 'function.php';
 require DIR . 'setting.php';
@@ -33,6 +33,8 @@ define('ERROR', 'error');
 
 define('ACTION', 'action');
 define('TOKEN', '_Token');
+
+define('DEBUG', true);
 
 $con = new EasySql($database_dsn, $database_username, $database_password);
 $req = new Request();
@@ -101,9 +103,9 @@ function error($status, $message, $log=false){
         $json['message'] = "$message";
         $res->content = [json_encode($json)];
     }else{
-        redirect(URL);
+        redirect();
     }
-    if($log !== false || !$is_api){
+    if($log !== false || !$is_api || DEBUG){
         $con->insert('error_log', array('status', 'message', 'text', 'created'), array($status, $message, $log, now()->format('Y:m:d H:i:s')));
     }
     quit(true);

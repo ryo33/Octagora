@@ -38,6 +38,7 @@ case 'users':
     break;
 default:
     $is_api = false;
+    $tmpl->title = 'Octagora API v1';
     require DIR . 'api/1/top.php';
     break;
 }

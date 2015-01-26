@@ -31,22 +31,18 @@ case 'users':
         $action = $req->get_param(ACTION, false);
         $token = $req->get_param(TOKEN, '');
         if($action === false){//login
-            if(check_token('login', $token)){
-                redirect(URL);
-            }
+            check_token('login', $token);
             $result = $user->check_login($req->get_param('name', ''), $req->get_param('password', ''));
             if($result === true){
-                redirect(URL . '/users?message=incorrect');
+                redirect('users?message=incorrect');
             }
             $se->login($result);
             redirect(URL);
         }else if($action === 'new'){//signup
-            if(check_token('signup', $token)){
-                redirect(URL);
-            }
+            check_token('signup', $token);
             $result = $user->add_user(['name'=>$req->get_param('name', ''), 'name2'=>$req->get_param('name2', ''), 'password'=>$req->get_param('password', ''), 'password2'=>$req->get_param('password2', '')]);
             if($result[0] !== false){
-                redirect(URL . '/users?action=new&message=' . $result[1]);
+                redirect('users?action=new&message=' . $result[1]);
             }
             $se->login($result[1]);
             redirect(URL);
@@ -63,6 +59,9 @@ case 'signup':
     $action = 'new';
     require DIR . 'web/login.php';
     break;
+case 'applications':
+    require DIR . 'web/applications.php';
+    break;
 case 'logout':
     $se->logout();
     redirect(URL);
@@ -71,3 +70,10 @@ default:
 }
 
 $res->content[] = $tmpl->display();
+
+function check_login(){
+    global $se;
+    if(! $se->is_login){
+        redirect('users?action=new');
+    }
+}
