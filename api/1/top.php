@@ -1,17 +1,15 @@
 <?php
 
-$tmpl->content[] = <<<REFERENCE
+$tmpl->add(<<<API
 <h1>Octagora API v1</h1>
-<ol type="I">
-<li><h2>Introduction</h2></li>
+<h2>Introduction</h2>
 <p>Octagora is a service saving texts with tags</p>
-<p>Octagora API v1 URL is <span class="uk-text-primary uk-text-bold">https://octagora.com/api/1</span></p>
-<li><h2>Reference</h2></li>
-<ul>
-<li><h3>Messages <span class="uk-badge uk-text-large">/messages</span></h3></li>
+<p>Octagora API v1 URL is "https://octagora.com/api/1"</p>
+<h2>Reference</h2>
+<h3>Messages<span class="uri">/messages</span></h3>
 <div id="messagesget" class="method">
     <div id="getmessages" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span> Get Messages</h4>
+        <h4><span class="method">GET</span>Get Messages</h4>
         <table class="parameters">
             <caption>Parameters</caption>
             <tr><th>Parameter</th><th>Required</th><th>Description</th><th>Default</th></tr>
@@ -26,17 +24,14 @@ $tmpl->content[] = <<<REFERENCE
         </table>
     </div>
     <div id="getamessage" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span> Get a Message</h4>
+        <h4><span class="method">GET</span>Get a Message</h4>
     </div>
 </div>
 <div id="messagespost" class="method">
     <div id="postamessage" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">POST</span> Post a Message</h4>
+        <h4><span class="method">POST</span>Post a Message</h4>
     </div>
 </div>
-<li><h3>Users <span class="uk-badge uk-text-large">/users</span></h3></li>
-<li><h3>Applications <span class="uk-badge uk-text-large">/applications</span></h3></li>
-</ul>
 <div id="tags">
     <h4>Tags</h4>
     <p>Escape '*', '.', '!', '_', '(', ')', ':', '/' in tag text by '/'.<span class="example">Example: "Example Tag(._.)" to "Example Tag/(/./_/./)".</span></p>
@@ -46,7 +41,7 @@ $tmpl->content[] = <<<REFERENCE
         <tr><td>*</td>          <td>AND</td></tr>
         <tr><td>.</td>          <td>OR</td></tr>
         <tr><td>!</td>          <td>NOT</td></tr>
-        <tr><td>_(under score)</td>          <td>XOR</td></tr>
+        <tr><td>_</td>          <td>XOR</td></tr>
     </table>
     <p><span class="example">a*!(b.c)*!d</span></p>
     <p>It means "having TAG 'a', and not having TAG 'b' or TAG 'c', and having TAG other than 'd'."</p>
@@ -74,4 +69,5 @@ $tmpl->content[] = <<<REFERENCE
     <li>Type OPTION is available when posting.</li>
     </ul>
 </div>
-REFERENCE;
+API
+);

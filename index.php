@@ -7,15 +7,15 @@ mb_http_input('auto');
 mb_http_output('UTF-8');
 
 define('DIR', dirname(__FILE__) . '/');
-define('REQ', DIR . '/require/');
+define('REQ', DIR . 'require/');
 define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
 
 require REQ . 'function.php';
 require DIR . 'setting.php';
-require DIR . 'ClassLoader.php';
+require REQ . 'ClassLoader.php';
 
 $loader = new ClassLoader();
-$loader->register_directory('require');
+$loader->register_directory(REQ);
 $loader->register();
 
 define('LAST', 'l');
@@ -34,7 +34,7 @@ define('ERROR', 'error');
 define('ACTION', 'action');
 define('TOKEN', '_Token');
 
-define('DEBUG', true);
+define('DEBUG', false);
 
 $con = new EasySql($database_dsn, $database_username, $database_password);
 $req = new Request();
@@ -43,25 +43,27 @@ $tmpl = new Template();
 $se = new Session();
 $user = new User($con);
 
+if(DEBUG){
+    $con->debug(true);
+}
+
 try{
     ob_start();
 
     if($se->check_login($user)){
-        $tmpl->add_navbar(<<<BUTTON
-    <li class=""><a class="uk-float-right" href="{$_(URL)}/users?action=logout">Logout</a></li>
-BUTTON
-        );
+        $tmpl->add_navbar(Design::tag('li', Design::link('users', 'User Page')) .
+            Design::tag('li', Design::link('users?action=logout', 'Logout')));
     }else{
-        $tmpl->add_navbar(<<<BUTTON
-    <li class=""><a class="uk-float-right" href="{$_(URL)}/users">Login</a></li>
-BUTTON
-        );
+        $tmpl->add_navbar(Design::tag('li', Design::link('users', 'Login')));
     }
 
     switch($req->get_uri()){
     case 'api':
         $is_api = true;
         require DIR . 'api/index.php';
+        break;
+    case 'oauth':
+        require DIR . 'oauth/index.php';
         break;
     default:
         $req->get_uri(0, -1);
@@ -76,7 +78,7 @@ BUTTON
 }
 
 function quit($error=false){
-    global $req, $res;
+    global $req, $res, $is_api;
     if($error === false){
         if($req->check_param() === true){
             error(400, 'unused parameter');
@@ -84,6 +86,9 @@ function quit($error=false){
         if($req->check_uri()){
             error(400, 'uri');
         }
+    }
+    if($is_api){
+        header('Content-Type: application/json; charset=utf-8');
     }
     $res->display();
     ob_end_flush();
@@ -95,9 +100,9 @@ function error($status, $message, $log=false){
     if($is_api){
         $error = $req->get_param(ERROR, false);
         if($error === '200'){
-            header('HTTP', true, 200);
+            http_response_code(200);
         }else{
-            header('HTTP', true, $status);
+            http_response_code($status);
         }
         $json['status'] = "$status";
         $json['message'] = "$message";

@@ -38,13 +38,29 @@ class Design{
     static function form_textarea($form){
         $required = isset($form['required']) ? ' required' : '';
         $placeholder = isset($form['placeholder']) ? ' placeholder="' . $form['placeholder'] . '"' : '';
-        $value = isset($form['value']) ? $value : '';
+        $value = isset($form['value']) ? $form['value'] : '';
         if(isset($form['label'])){
             $label = '<p>' . $form['label'] . '</p>';
         }else{
             $label = '';
         }
         return self::tag('div', $label . '<textarea class="uk-width-1-1" name="' . $form['name'] . $placeholder . $required . '">' . $value . '</textarea>', 'uk-form-row uk-text-left');
+    }
+
+    /**
+     * required
+     * name
+     * label
+     * options
+     */
+    static function form_select($form){
+        $required = isset($form['required']) ? ' required' : '';
+        if(isset($form['label'])){
+            $label = '<p>' . $form['label'] . '</p>';
+        }else{
+            $label = '';
+        }
+        return self::tag('div', $label . '<select name="' . $form['name'] . '"' . $required . '>' . implode('', array_map(function($a){return '<option>' . $a . '</option>';}, $form['options'])) . '</select>', 'uk-form-row uk-text-left');
     }
 
     static function form_submit($text){
@@ -56,16 +72,17 @@ class Design{
     }
 
     static function form_start($form_name, $url, $method){
-        return '<form class="uk-panel uk-panel-box uk-form" action="' . URL . $url . '" method="' . $method . '"><input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />';
+        return '<form class="uk-panel uk-panel-box uk-form uk-container-center" action="' . URL . $url . '" method="' . $method . '"><input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />';
     }
 
     static function form_end(){
         return '</form>';
     }
 
-    static function tag($tag, $text, $class=false){
+    static function tag($tag, $text, $class=false, $style=false){
         $class = $class !== false ? ' class="' . $class . '"' : '';
-        return '<' . $tag . $class . '>' . $text . '</' . $tag . '>';
+        $style = $style !== false ? ' style="' . $style . '"' : '';
+        return '<' . $tag . $class . $style . '>' . $text . '</' . $tag . '>';
     }
 
     static function link($url, $text, $class=false){
@@ -80,9 +97,14 @@ class Design{
             $result .= '<tr>' . implode('', array_map(function($a){return '<th>' . $a . '</th>';}, $head)) . '</tr>';
         }
         foreach($rows as $row){
-            $result .= '<tr>' . implode('', array_map(function($a){return '<td>' . $a . '</td>';}, $head)) . '</tr>';
+            $result .= '<tr>' . implode('', array_map(function($a){return '<td>' . $a . '</td>';}, $row)) . '</tr>';
         }
         return $result . '</table>';
+    }
+
+    static function _list($tag, $lis, $class=false, $class2=false){
+        $class2 = $class2 !== false ? ' class="' . $class2 . '"' : '';
+        return Design::tag($tag,implode('', array_map(function($a){return '<li' . $class2 . '>' . $a . '</li>';}, $lis)), $class);
     }
 
 }

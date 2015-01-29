@@ -12,6 +12,10 @@ DESC;
         $this->navbar = '';
     }
 
+    function add($text){
+        $this->content[] = $text;
+    }
+
     function add_navbar($text){
         $this->navbar .= $text;
     }
@@ -37,9 +41,8 @@ DESC;
 <body>
 <div class="uk-container uk-container-center uk-margin-top uk-margin-large-botoom">
 <nav class="uk-navbar uk-margin-large-bottom">
-    <a class="uk-navbar-brand uk-hidden-small" href="{$_(URL)}">Octagora</a>
-    <ul class="uk-navbar-nav uk-hidden-small">
-        <li><a href="{$_(URL)}">Top</a></li>
+    <ul class="uk-navbar-nav">
+        <li><a class="uk-navbar-brand" href="{$_(URL)}">Octagora</a></li>
         <li><a href="{$_(URL)}/api">API</a></li>
     {$this->navbar}
     </ul>

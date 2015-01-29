@@ -1,7 +1,10 @@
 <?php
 
+$application = new Application($con);
+
 switch($req->get_uri()){
 case 'messages':
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
     require REQ . 'Message.php';
     $message = new Message($con);
     if($req->request_method === REQUEST::GET){
@@ -27,7 +30,7 @@ case 'messages':
         $message->post_message($json,
             $req->get_param(TAGS, false),
             $req->get_param(TEXT, ''),
-            $user_id = false,
+            $user_id,
             $client_id
         );
     }else{
@@ -35,10 +38,10 @@ case 'messages':
     }
     break;
 case 'users':
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
     break;
 default:
     $is_api = false;
-    $tmpl->title = 'Octagora API v1';
     require DIR . 'api/1/top.php';
     break;
 }

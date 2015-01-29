@@ -74,6 +74,6 @@ $res->content[] = $tmpl->display();
 function check_login(){
     global $se;
     if(! $se->is_login){
-        redirect('users?action=new');
+        redirect('users');
     }
 }

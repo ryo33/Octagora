@@ -48,8 +48,11 @@ function echoh($text){
     echo h($text);
 }
 
-function redirect($url){
-    header("Location: " . URL . $url);
+function redirect($url=''){
+    if(DEBUG){
+        error_log($url);
+    }
+    header('Location: ' . URL . $url);
     exit();
 }
 

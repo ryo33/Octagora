@@ -202,7 +202,7 @@ class Message extends Model{
         $autotags[] = $this->get_tag_id('length:' . mb_strlen($text), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('application:' . $client_id, $type); $types[$type] = true;
         if($user_id !== false){
-            $autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
+            //$autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
         }
         foreach($this->tag_types as $tag_type){
             if($tag_type !== 'not_used' && array_key_exists($this->tag_types_key[$tag_type], $types) === false){
@@ -425,6 +425,7 @@ class Message extends Model{
     }
 
     function get_tag_id($tag, &$type, $post=false){
+        global $application;
         $escaped_tag = $this->escape_tag($tag, $type, $post);
         //check tag type is allowed
         if($post and ! in_array($type, $this->allow_post_tag_types)){
@@ -448,35 +449,38 @@ class Message extends Model{
             break;
         case $this->tag_types_key['length']:
             if(check_numeric($escaped_tag, false, self::TEXT_MAX)){
-                error(400, 'length');
+                error(400, 'special tag length');
             }
             break;
         case $this->tag_types_key['year']:
             if(check_numeric($escaped_tag, 4)){
-                error(400, 'year');
+                error(400, 'special tag year');
             }
             break;
         case $this->tag_types_key['month']:
             if(check_numeric($escaped_tag, 2, 12)){
-                error(400, 'month');
+                error(400, 'special tag month');
             }
             break;
         case $this->tag_types_key['day']:
             if(check_numeric($escaped_tag, 2, 31)){
-                error(400, 'day');
+                error(400, 'special tag day');
             }
             break;
         case $this->tag_types_key['hour']:
             if(check_numeric($escaped_tag, 2, 23)){
-                error(400, 'hour');
+                error(400, 'special tag hour');
             }
             break;
         case $this->tag_types_key['minute']:
             if(check_numeric($escaped_tag, 2, 59)){
-                error(400, 'hour');
+                error(400, 'special tag minute');
             }
             break;
         case $this->tag_types_key['application']:
+            if($application->is_exists($escaped_tag) !== true){
+                error(400, 'special tag application');
+            }
             break;
         }
         $result = $this->con->fetch('SELECT COUNT(`id`), `id` FROM `tag` WHERE `text` = BINARY ? AND `type` = ?', array($escaped_tag, $type));

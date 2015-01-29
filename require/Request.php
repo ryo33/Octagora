@@ -14,6 +14,7 @@ class Request{
             $uri = substr($uri, 0, $pos);
         }
         $this->uris = explode('/', trim($uri, '/'));
+        $this->uris = array_map('urldecode', $this->uris);
         $this->uri_position = 0;
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $this->request_method = self::POST;

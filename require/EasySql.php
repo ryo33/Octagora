@@ -13,8 +13,7 @@ class EasySql{
 
     function prepare($sql, $arg=null, $exec=false){
         if($this->debug){
-            echo $sql . '\n';
-            var_dump($arg);
+            error_log($sql);
         }
         if($arg !== null){
             if(!is_array($arg)){
@@ -72,4 +71,16 @@ class EasySql{
             return $this->pdo->lastInsertId();
         }
     } 
+
+    function update($table, $id, $columns, $values){
+        if(!is_array($columns)){
+            $columns = array($columns);
+        }
+        if(!is_array($values)){
+            $values = array($values);
+        }
+        $values[] = $id;
+        $this->execute('UPDATE `' . $table . '` SET ' . implode(', ', array_map(function($a){return $a . ' = ?';}, $columns)) . ' WHERE `id` = BINARY ?', $values);
+    }
+
 }
