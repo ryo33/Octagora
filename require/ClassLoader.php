@@ -9,7 +9,7 @@ class ClassLoader{
     }
 
     public function register_directory($dir){
-        $this->dirs[] = DIR . $dir;
+        $this->dirs[] = $dir;
     }
 
     public function load_class($class){
