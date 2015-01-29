@@ -79,10 +79,10 @@ class Design{
         return '</form>';
     }
 
-    static function tag($tag, $text, $option){
-        $class = $option['class'] ?: false;
-        $style = $option['style'] ?: false;
-        $id = $option['id'] ?: false;
+    static function tag($tag, $text, $option=[]){
+        $class = isset($option['class']) ? $option['class'] : false;
+        $style = isset($option['style']) ? $option['style'] : false;
+        $id = isset($option['id']) ? $option['id'] : false;
         if(is_array($tag)){
             if(count($tag) > 1){
                 $tmp = $tag[0];
