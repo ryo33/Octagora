@@ -25,6 +25,12 @@ class Auth extends Model{
         case self::AT_TOKEN:
             break;
         case self::AT_PASSWORD:
+            parent::insert('credential', ['application_id', 'user_id'], [$args['application_id'], $args['user_id']]);
+            $access_token = $this->create_token('access_token');
+            $refresh_token = $this->create_token('refresh_token');
+            parent::insert('access_token', ['type', 'application_id', 'access_token', 'refresh_token', 'user_id'],
+                [$args['type'], $args['application_id'], $access_token, $refresh_token, $args['user_id']]);
+            return [$access_token, $refresh_token];
             break;
         case self::AT_CLIENT:
             $access_token = $this->create_token('access_token');
@@ -66,7 +72,9 @@ class Auth extends Model{
             case self::AT_TOKEN:
                 exit();
             case self::AT_PASSWORD:
-                exit();
+                $user_id = $access['user_id'];
+                $client_id = $access['application_id'];
+                return;
             case self::AT_CLIENT:
                 $user_id = false;
                 $client_id = $access['application_id'];

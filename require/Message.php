@@ -202,7 +202,7 @@ class Message extends Model{
         $autotags[] = $this->get_tag_id('length:' . mb_strlen($text), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('application:' . $client_id, $type); $types[$type] = true;
         if($user_id !== false){
-            //$autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
+            $autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
         }
         foreach($this->tag_types as $tag_type){
             if($tag_type !== 'not_used' && array_key_exists($this->tag_types_key[$tag_type], $types) === false){

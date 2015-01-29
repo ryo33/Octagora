@@ -11,6 +11,7 @@ define('REQ', DIR . 'require/');
 define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
 
 require DIR . 'setting.php';
+require REQ . 'function.php';
 require REQ . 'ClassLoader.php';
 
 $loader = new ClassLoader();
@@ -34,15 +35,15 @@ default:
     exit();
 }
 
-function error($uri, $error, $state=false){
-    if($scope === false){
-        redirect($uri . '?error=' . $error);
+function error($error, $uri=false){
+    if($uri === false){
+        exit(json_encode(['error_message'=>$error]));
     }else{
         redirect($uri . '?error=' . $error . '&state=' . $state);
     }
 }
 
-function redirect($uri, $message, $params=false){
+function oauth_redirect($uri, $message, $params=false){
     if($uri === false){
         exit($message);
     }

@@ -49,7 +49,7 @@ class Application extends Model{
         //type
         switch($args['type']){
         case 'confidencial':
-            $args['type'] = self::TYPE_CONFIDENCIAL;
+            $args['type'] = self::TYPE_CONFIDENTIAL;
             break;
         case 'public':
             $args['type'] = self::TYPE_PUBLIC;

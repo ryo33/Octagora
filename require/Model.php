@@ -3,7 +3,7 @@
 class Model{
 
     const ID_LENGTH = 16;
-    public static $id_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!#$%&()~=~|{}`*+_?><,./;]:[@^-\'"\\';
+    public static $id_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 
     function __construct($con){
         global $_SERVER;
