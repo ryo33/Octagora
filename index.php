@@ -10,6 +10,7 @@ define('DIR', dirname(__FILE__) . '/');
 define('REQ', DIR . 'require/');
 define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
 
+require DIR . 'start.php';
 require REQ . 'function.php';
 require DIR . 'setting.php';
 require REQ . 'ClassLoader.php';
@@ -51,8 +52,7 @@ try{
     ob_start();
 
     if($se->check_login($user)){
-        $tmpl->add_navbar(Design::tag('li', Design::link('users', 'User Page')) .
-            Design::tag('li', Design::link('users?action=logout', 'Logout')));
+        $tmpl->add_navbar(Design::tag('li', Design::link('users', 'User Page')));
     }else{
         $tmpl->add_navbar(Design::tag('li', Design::link('users', 'Login')));
     }

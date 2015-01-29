@@ -10,6 +10,7 @@ define('DIR', dirname(__FILE__) . '/../');
 define('REQ', DIR . 'require/');
 define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
 
+require DIR . 'start.php';
 require DIR . 'setting.php';
 require REQ . 'function.php';
 require REQ . 'ClassLoader.php';
