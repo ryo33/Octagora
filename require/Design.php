@@ -79,10 +79,24 @@ class Design{
         return '</form>';
     }
 
-    static function tag($tag, $text, $class=false, $style=false){
-        $class = $class !== false ? ' class="' . $class . '"' : '';
-        $style = $style !== false ? ' style="' . $style . '"' : '';
-        return '<' . $tag . $class . $style . '>' . $text . '</' . $tag . '>';
+    static function tag($tag, $text, $option){
+        $class = $option['class']?: false;
+        $style = $option['style']?: false;
+        $id = $option['id'] ?: false;
+        if(is_array($tag)){
+            if(count($tag) > 1){
+                $tmp = $tag[0];
+                array_shift($tag);
+                $text = self::tag($tag, $text);
+                $tag = $tmp;
+            }else{
+                $tag = $tag[0];
+            }
+        }
+        $class = $class !== false? ' class="' . $class . '"': '';
+        $style = $style !== false? ' style="' . $style . '"': '';
+        $id = $id !== false? ' id="' . $id . '"': '';
+        return '<' . $tag . $id . $class . $style . '>' . $text . '</' . $tag . '>';
     }
 
     static function link($url, $text, $class=false){
