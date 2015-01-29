@@ -80,9 +80,10 @@ class Design{
     }
 
     static function tag($tag, $text, $option=[]){
-        $class = isset($option['class']) ? $option['class'] : false;
-        $style = isset($option['style']) ? $option['style'] : false;
-        $id = isset($option['id']) ? $option['id'] : false;
+        $options = '';
+        foreach($option as $key=>$o){
+            $options .= ' ' . $key . '="' . $o . '"';
+        }
         if(is_array($tag)){
             if(count($tag) > 1){
                 $tmp = $tag[0];
@@ -96,7 +97,7 @@ class Design{
         $class = $class !== false ? ' class="' . $class . '"' : '';
         $style = $style !== false ? ' style="' . $style . '"' : '';
         $id = $id !== false ? ' id="' . $id . '"' : '';
-        return '<' . $tag . $id . $class . $style . '>' . $text . '</' . $tag . '>';
+        return '<' . $tag . $options . '>' . $text . '</' . $tag . '>';
     }
 
     static function link($url, $text, $class=false){
