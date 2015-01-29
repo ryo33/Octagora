@@ -80,8 +80,8 @@ class Design{
     }
 
     static function tag($tag, $text, $option){
-        $class = $option['class']?: false;
-        $style = $option['style']?: false;
+        $class = $option['class'] ?: false;
+        $style = $option['style'] ?: false;
         $id = $option['id'] ?: false;
         if(is_array($tag)){
             if(count($tag) > 1){
@@ -93,9 +93,9 @@ class Design{
                 $tag = $tag[0];
             }
         }
-        $class = $class !== false? ' class="' . $class . '"': '';
-        $style = $style !== false? ' style="' . $style . '"': '';
-        $id = $id !== false? ' id="' . $id . '"': '';
+        $class = $class !== false ? ' class="' . $class . '"' : '';
+        $style = $style !== false ? ' style="' . $style . '"' : '';
+        $id = $id !== false ? ' id="' . $id . '"' : '';
         return '<' . $tag . $id . $class . $style . '>' . $text . '</' . $tag . '>';
     }
 
