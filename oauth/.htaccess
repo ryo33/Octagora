@@ -1,0 +1,5 @@
+Options -Indexes
+IndexIgnore *
+DirectoryIndex index.php
+RewriteEngine on
+RewriteRule !\.(js|ico|html|css)$ index.php
