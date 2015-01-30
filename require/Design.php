@@ -94,9 +94,6 @@ class Design{
                 $tag = $tag[0];
             }
         }
-        $class = $class !== false ? ' class="' . $class . '"' : '';
-        $style = $style !== false ? ' style="' . $style . '"' : '';
-        $id = $id !== false ? ' id="' . $id . '"' : '';
         return '<' . $tag . $options . '>' . $text . '</' . $tag . '>';
     }
 
