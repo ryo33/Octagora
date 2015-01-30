@@ -1,15 +1,29 @@
 <?php
 
-$tmpl->add(<<<API
-<h1>Octagora API v1</h1>
-<h2>Introduction</h2>
-<p>Octagora is a service saving texts with tags</p>
-<p>Octagora API v1 URL is "https://octagora.com/api/1"</p>
+$tmpl->add(
+    Design::tag('h1', 'Octagora API v1') .
+    Design::tag('ul',
+        Design::tag(['li', 'h2'], 'Introduction', ['id'=>'introduction']) .
+        Design::tag('div',
+            Design::tag('p', 'Octagora is a service saving texts with tags') .
+            Design::tag('p', 'Octagora API v1 URL is "https://octagora.com/api/1"')
+        ) .
+        Design::tag(['li', 'h2'], 'OAuth', ['id'=>'oauth']) .
+        Design::tag('div', ''
+        ) .
+        Design::tag(['li', 'h2'], 'Reference', ['id'=>'reference']) .
+        Design::tag('div', ''
+        )
+    )
+);
+/*
+<p></p>
+<p></p>
 <h2>Reference</h2>
 <h3>Messages<span class="uri">/messages</span></h3>
-<div id="messagesget" class="method">
+<div id="messagesget">
     <div id="getmessages" class="request">
-        <h4><span class="method">GET</span>Get Messages</h4>
+        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span>Get Messages</h4>
         <table class="parameters">
             <caption>Parameters</caption>
             <tr><th>Parameter</th><th>Required</th><th>Description</th><th>Default</th></tr>
@@ -24,24 +38,24 @@ $tmpl->add(<<<API
         </table>
     </div>
     <div id="getamessage" class="request">
-        <h4><span class="method">GET</span>Get a Message</h4>
+        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span>Get a Message</h4>
     </div>
 </div>
-<div id="messagespost" class="method">
+<div id="messagespost">
     <div id="postamessage" class="request">
-        <h4><span class="method">POST</span>Post a Message</h4>
+        <h4><span class="uk-badge uk-badge-success uk-text-large">POST</span>Post a Message</h4>
     </div>
 </div>
 <div id="tags">
     <h4>Tags</h4>
-    <p>Escape '*', '.', '!', '_', '(', ')', ':', '/' in tag text by '/'.<span class="example">Example: "Example Tag(._.)" to "Example Tag/(/./_/./)".</span></p>
+    <p>Escape '*', '.', '!', '-', '(', ')', ':', '/' in tag text by '/'.<span class="example">Example: "Example Tag(._.)" to "Example Tag/(/._/./)".</span></p>
     <table>
         <caption>Operators</caption>
         <tr><th>Operator</th>   <th>Description</th></tr>
         <tr><td>*</td>          <td>AND</td></tr>
         <tr><td>.</td>          <td>OR</td></tr>
         <tr><td>!</td>          <td>NOT</td></tr>
-        <tr><td>_</td>          <td>XOR</td></tr>
+        <tr><td>-</td>          <td>XOR</td></tr>
     </table>
     <p><span class="example">a*!(b.c)*!d</span></p>
     <p>It means "having TAG 'a', and not having TAG 'b' or TAG 'c', and having TAG other than 'd'."</p>
@@ -69,5 +83,7 @@ $tmpl->add(<<<API
     <li>Type OPTION is available when posting.</li>
     </ul>
 </div>
+</ul>
 API
 );
+ */

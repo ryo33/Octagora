@@ -44,7 +44,7 @@ class Design{
         }else{
             $label = '';
         }
-        return self::tag('div', $label . '<textarea class="uk-width-1-1" name="' . $form['name'] . $placeholder . $required . '">' . $value . '</textarea>', 'uk-form-row uk-text-left');
+        return self::tag('div', $label . '<textarea class="uk-width-1-1" name="' . $form['name'] . $placeholder . $required . '">' . $value . '</textarea>', ['class'=>'uk-form-row uk-text-left']);
     }
 
     /**
@@ -60,7 +60,7 @@ class Design{
         }else{
             $label = '';
         }
-        return self::tag('div', $label . '<select name="' . $form['name'] . '"' . $required . '>' . implode('', array_map(function($a){return '<option>' . $a . '</option>';}, $form['options'])) . '</select>', 'uk-form-row uk-text-left');
+        return self::tag('div', $label . '<select name="' . $form['name'] . '"' . $required . '>' . implode('', array_map(function($a){return '<option>' . $a . '</option>';}, $form['options'])) . '</select>', ['class'=>'uk-form-row uk-text-left']);
     }
 
     static function form_submit($text){
@@ -115,8 +115,9 @@ class Design{
     }
 
     static function _list($tag, $lis, $class=false, $class2=false){
+        $class = $class !== false ? ' class="' . $class . '"' : '';
         $class2 = $class2 !== false ? ' class="' . $class2 . '"' : '';
-        return Design::tag($tag,implode('', array_map(function($a){return '<li' . $class2 . '>' . $a . '</li>';}, $lis)), $class);
+        return Design::tag($tag,implode('', array_map(function($a)use($class2){return '<li' . $class2 . '>' . $a . '</li>';}, $lis)), ['class'=>$class]);
     }
 
 }

@@ -18,16 +18,51 @@ class Auth extends Model{
         parent::__construct($con);
     }
 
-    function create_access_token($args){
+    function update_access_token($args){
         switch($args['type']){
         case self::AT_CODE:
             break;
         case self::AT_TOKEN:
             break;
         case self::AT_PASSWORD:
-            parent::insert('credential', ['application_id', 'user_id'], [$args['application_id'], $args['user_id']]);
+            $access = $this->get_access_token($access_token);
+            if($this->check_at_limit($access['created'])){
+                $access_token = $this->create_token('access_token');
+                $refresh_token = $this->create_token('refresh_token');
+                parent::update('access_token', $access['id'], ['access_token', 'refresh_token'], [$access_token, $refresh_token]);
+                return [$access_token, $refresh_token];
+            }else{
+                return true;
+            }
+        case self::AT_CLIENT:
+            return true;
+        }
+    }
+
+    function get_access_token($access_token){
+        $result = $this->con->fetch('SELECT COUNT(`id`), `id`, `type`, `user_id`, `application_id`, `refresh_token`, `created` FROM `access_token` WHERE `access_token` = BINARY ?', $access_token);
+        if($result['COUNT(`id`)'] !== '1'){
+            return true;
+        }
+        return $result;
+    }
+
+    function create_access_token($args){
+        $remove_access_token = function($application_id, $user_id){
+            $this->con->execute('delete from `access_token` where `application_id` = BINARY ? AND `user_id` = BINARY ?', [$application_id, $user_id]);
+        };
+        switch($args['type']){
+        case self::AT_CODE:
+            break;
+        case self::AT_TOKEN:
+            break;
+        case self::AT_PASSWORD:
+            if($this->con->fetchColumn('SELECT COUNT(`id`) FROM `credential` WHERE `application_id` = BINARY ? AND `user_id` = BINARY ?', [$args['application_id'], $args['user_id']]) === '0'){
+                parent::insert('credential', ['application_id', 'user_id'], [$args['application_id'], $args['user_id']]);
+            }
             $access_token = $this->create_token('access_token');
             $refresh_token = $this->create_token('refresh_token');
+            $remove_access_token($args['application_id'], $args['user_id']);
             parent::insert('access_token', ['type', 'application_id', 'access_token', 'refresh_token', 'user_id'],
                 [$args['type'], $args['application_id'], $access_token, $refresh_token, $args['user_id']]);
             return [$access_token, $refresh_token];
@@ -50,32 +85,33 @@ class Auth extends Model{
         return $result;
     }
 
-    //check authorization and return user_id
-    function get_user_id($arg){
-    }
-
-    function update_key($client_id){
+    function check_at_limit($created){
+        global $now;
+        $created = new DateTime($created, new DateTimeZone('GMT'));
+        return (int)$now->format('U') - (int)$created->format('U') > Auth::AT_LIMIT;
     }
 
     function access($access_token, &$user_id, &$client_id){
-        global $now;
-        $access = $this->con->fetch('SELECT COUNT(`id`), `id`, `type`, `user_id`, `application_id`, `refresh_token`, `created` FROM `access_token` WHERE `access_token` = BINARY ?', $access_token);
-        $created = new DateTime($access['created'], new DateTimeZone('GMT'));
-        if($access['COUNT(`id`)'] !== '1'){
+        $access = $this->get_access_token($access_token);
+        if($access === true){
             error(400, 'wrong access_token');
-        }else if((int)$now->format('U') - (int)$created->format('U') > Auth::AT_LIMIT){
-            $this->con->execute('DELETE FROM `access_token` WHERE `id` = ?', $access['id']);
-            error(400, 'old access_token');
         }else{
             switch($access['type']){
             case self::AT_CODE: exit();
             case self::AT_TOKEN:
                 exit();
             case self::AT_PASSWORD:
+                if($this->check_at_limit($access['created'])){
+                    error(400, 'old access_token');
+                }
                 $user_id = $access['user_id'];
                 $client_id = $access['application_id'];
                 return;
             case self::AT_CLIENT:
+                if($this->check_at_limit($access['created'])){
+                    $this->con->execute('DELETE FROM `access_token` WHERE `id` = ?', $access['id']);
+                    error(400, 'old access_token');
+                }
                 $user_id = false;
                 $client_id = $access['application_id'];
                 return;
