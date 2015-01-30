@@ -136,6 +136,95 @@ class Application extends Model{
         return $result;
     }
 
+    function format_selects(&$needs, $other=false){
+        if($other !== false){
+            $other .= ', ';
+        }else{
+            $other = '';
+        }
+        $needs = explode(',', $needs);
+        $selects = array();
+        foreach($needs as $need){
+            switch($need){
+            case 'n':
+                if(in_array('name', $selects)){
+                    error(400, 'needs');
+                }
+                $selects[] = 'name';
+                break;
+            case 'd':
+                if(in_array('description', $selects)){
+                    error(400, 'needs');
+                }
+                $selects[] = 'description';
+                break;
+            case 'w':
+                if(in_array('web', $selects)){
+                    error(400, 'needs');
+                }
+                $selects[] = 'web';
+                break;
+            case 'c':
+                if(in_array('created', $selects)){
+                    error(400, 'needs');
+                }                     ;
+                $selects[] = 'created';
+                break;
+            }
+        }
+        return count($selects) === 0 ? $other . '`id`' : ($other . '`id`, ' . implode(', ', array_map(function($x){return '`'.$x.'`';}, $selects)));
+    }
+
+    function format_application(&$json, $application, $needs){
+        foreach($needs as $need){
+            switch($need){
+            case 'i':
+                if(array_key_exists('i', $json)){
+                    error(400, 'needs');
+                }
+                $json['i'] = $application['id'];
+                break;
+            case 'n':
+                if(array_key_exists('n', $json)){
+                    error(400, 'needs');
+                }
+                $json['n'] = $application['name'];
+                break;
+            case 'd':
+                if(array_key_exists('d', $json)){
+                    error(400, 'needs');
+                }
+                $json['d'] = $application['description'];
+                break;
+            case 'w':
+                if(array_key_exists('w', $json)){
+                    error(400, 'needs');
+                }
+                $json['w'] = $application['web'];
+                break;
+            case 'c':
+                if(array_key_exists('c', $json)){
+                    error(400, 'needs');
+                }
+                $json['c'] = $application['created'];
+                break;
+            default:
+                error(400, 'needs');
+            }
+        }
+    }
+
+    function get_application_json(&$json, $id, $needs){
+        $selects = $this->format_selects($needs, 'COUNT(`id`)');
+        $application = $this->con->fetch('SELECT ' . $selects . ' FROM `application` WHERE `id` = BINARY ?', $id);
+        if($application['COUNT(`id`)'] !== '1'){
+            error(400, 'application_id');
+        }
+        $json['data-count'] = 1;
+        $json['application'] = [];
+        $this->format_application($json['application'], $application, $needs);
+    }
+
     function is_exists($application_id){
         return $this->con->fetchColumn('SELECT COUNT(`id`) FROM `application` WHERE `id` = BINARY ?', $application_id) === '1';
     }

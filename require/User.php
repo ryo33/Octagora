@@ -38,6 +38,83 @@ class User extends Model{
         return sha256($password . '\\Rss' . $user_id . '(^^)\\');
     }
 
+    function format_selects(&$needs, $other=false){
+        if($other !== false){
+            $other .= ', ';
+        }else{
+            $other = '';
+        }
+        $needs = explode(',', $needs);
+        $selects = array();
+        foreach($needs as $need){
+            switch($need){
+            case 'n1':
+                if(in_array('name', $selects)){
+                    error(400, 'needs');
+                }
+                $selects[] = 'name';
+                break;
+            case 'n2':
+                if(in_array('display', $selects)){
+                    error(400, 'needs');
+                }
+                $selects[] = 'display';
+                break;
+            case 'c':
+                if(in_array('created', $selects)){
+                    error(400, 'needs');
+                }                     ;
+                $selects[] = 'created';
+                break;
+            }
+        }
+        return count($selects) === 0 ? $other . '`id`' : ($other . '`id`, ' . implode(', ', array_map(function($x){return '`'.$x.'`';}, $selects)));
+    }
+
+    function format_user(&$json, $user, $needs){
+        foreach($needs as $need){
+            switch($need){
+            case 'i':
+                if(array_key_exists('i', $json)){
+                    error(400, 'needs');
+                }
+                $json['i'] = $user['id'];
+                break;
+            case 'n1':
+                if(array_key_exists('n1', $json)){
+                    error(400, 'needs');
+                }
+                $json['n1'] = $user['name'];
+                break;
+            case 'n2':
+                if(array_key_exists('n2', $json)){
+                    error(400, 'needs');
+                }
+                $json['n2'] = $user['display'];
+                break;
+            case 'c':
+                if(array_key_exists('c', $json)){
+                    error(400, 'needs');
+                }
+                $json['c'] = $user['created'];
+                break;
+            default:
+                error(400, 'needs');
+            }
+        }
+    }
+
+    function get_user(&$json, $id, $needs){
+        $selects = $this->format_selects($needs, 'COUNT(`id`)');
+        $user = $this->con->fetch('SELECT ' . $selects . ' FROM `user` WHERE `id` = BINARY ?', $id);
+        if($user['COUNT(`id`)'] !== '1'){
+            error(400, 'user_id');
+        }
+        $json['data-count'] = 1;
+        $json['user'] = [];
+        $this->format_user($json['user'], $user, $needs);
+    }
+
     function add_user($informations){
         $user_name = $informations['name'];
         $display_name = $informations['name2'];
@@ -68,12 +145,6 @@ class User extends Model{
         }else{
             //update
         }
-    }
-
-    function add_app($informations){
-    }
-
-    function update_app($infomations){
     }
 
 }

@@ -7,7 +7,7 @@ class Message extends Model{
     private $and = '*';
     private $or = '.';
     private $not = '!';
-    private $xor = '_';
+    private $xor = '-';
 
     function __construct($con){
         parent::__construct($con);
@@ -223,8 +223,6 @@ class Message extends Model{
         if($tokens === true){
             error(400, 'tag');
         }
-        //log tags
-        parent::insert('get_messages_log', ['ts'], [implode('', $tokens)]);
         return $tokens;
     }
 
@@ -545,7 +543,7 @@ class Message extends Model{
                 break;
             }
         }
-        $result = preg_replace('/\/([\|\^\&\(\)\/~])/', '$1', $result);
+        $result = preg_replace('/\/([\\' . $this->and . '\\' . $this->or . '\\' . $this->not . '\(\)\/' . $this->xor . '])/', '$1', $result);
         $result = str_replace('/:', ':', $result, $count);
         if(substr_count($result, ':') !== $count){
             error(400, 'tag escape \':\'');

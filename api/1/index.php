@@ -5,7 +5,6 @@ $application = new Application($con);
 switch($req->get_uri()){
 case 'messages':
     $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
-    require REQ . 'Message.php';
     $message = new Message($con);
     if($req->request_method === REQUEST::GET){
         $uri = $req->get_uri();
@@ -19,7 +18,7 @@ case 'messages':
                 $req->get_param(TAGS, false),
                 $req->get_param(TAGS_OPTION, 'normal,by_user,to_user,user,message,to_message')
             );
-        }else if(count($uri) === Model::ID_LENGTH){
+        }else if(strlen($uri) === Model::ID_LENGTH){
             $message->get_message($json,
                 $uri,
                 $req->get_param(NEEDS, 'i,t'),
@@ -39,6 +38,35 @@ case 'messages':
     break;
 case 'users':
     $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
+    if($req->request_method === REQUEST::GET){
+        $uri = $req->get_uri();
+        if(strlen($uri) === Model::ID_LENGTH){
+            $user->get_user($json,
+                $uri,
+                $req->get_param(NEEDS, 'i,n1,n2')
+            );
+        }else{
+            error(400, 'user_id');
+        }
+    }else{
+        error(400, 'uri');
+    }
+    break;
+case 'applications':
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
+    if($req->request_method === REQUEST::GET){
+        $uri = $req->get_uri();
+        if(strlen($uri) === Model::ID_LENGTH){
+            $application->get_application_json($json,
+                $uri,
+                $req->get_param(NEEDS, 'i,n')
+            );
+        }else{
+            error(400, 'application_id');
+        }
+    }else{
+        error(400, 'uri');
+    }
     break;
 default:
     $is_api = false;
