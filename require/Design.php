@@ -102,9 +102,10 @@ class Design{
         return '<a href="' . URL . $url . '"' . $class . '>' . $text . '</a>';
     }
 
-    static function table($head, $rows, $class=false){
+    static function table($head, $rows, $caption=false, $class=false){
         $class = $class !== false ? ' class="' . $class . '"' : '';
-        $result = '<table' . $class . '>';
+        $caption = $caption !== false ? '<caption>' . $caption . '</caption>' : '';
+        $result = '<table' . $class . '>' . $caption;
         if(count($head) > 0){
             $result .= '<tr>' . implode('', array_map(function($a){return '<th>' . $a . '</th>';}, $head)) . '</tr>';
         }

@@ -17,7 +17,7 @@ class Message extends Model{
             4=>'hour', 5=>'minute',
             6=>'by_user', 7=>'to_user', 8=>'user',
             9=>'message', 10=>'to_message',
-            11=>'length',
+            11=>'system',
             12=>'application',
             13=>'not_used',
             14=>'hash'
@@ -199,7 +199,6 @@ class Message extends Model{
         $autotags[] = $this->get_tag_id('day:' . $now->format('d'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('hour:' . $now->format('H'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('minute:' . $now->format('i'), $type); $types[$type] = true;
-        $autotags[] = $this->get_tag_id('length:' . mb_strlen($text), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('application:' . $client_id, $type); $types[$type] = true;
         if($user_id !== false){
             $autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
@@ -443,11 +442,6 @@ class Message extends Model{
         case $this->tag_types_key['not_used']:
             if(! in_array($escaped_tag, $this->tag_types_key)){
                 error(400, 'special tag not_used');
-            }
-            break;
-        case $this->tag_types_key['length']:
-            if(check_numeric($escaped_tag, false, self::TEXT_MAX)){
-                error(400, 'special tag length');
             }
             break;
         case $this->tag_types_key['year']:

@@ -26,7 +26,7 @@ if($uri === false){
             $tmpl->add('<div class="uk-width-3-5 uk-container-center">');
             $tmpl->content[] = Design::tag('div', Design::table([
                 '', '', 'ID', 'Name', 'Type', 'Description', 'Web Page'
-            ], $rows, 'uk-table'), ['class'=>'uk-overflow-container uk-container-center']);
+            ], $rows, 'Applications', 'uk-table'), ['class'=>'uk-overflow-container uk-container-center']);
             $tmpl->add(
                 Design::tag('div', Design::link('applications?action=new', 'Add New Application', 'uk-button uk-width-1-1'), ['class'=>'uk-container-center uk-width-5-6', 'style'=>'margin-top: 10px;'])
             );
@@ -107,7 +107,7 @@ if($uri === false){
                     [
                         Design::link('applications/' . urlencode($uri) . '?action=edit', 'Edit', 'uk-button uk-button-success'), $uri, $app['name'], $app['client_type'], $app['redirect'], $app['client_id'], $app['client_secret'], $app['description'], $app['web']
                     ]
-                ], 'uk-table'), ['class'=>'uk-container-center uk-overflow-container']);
+                ], false, 'uk-table'), ['class'=>'uk-container-center uk-overflow-container']);
             }else{
                 $tmpl->content[] = Design::tag('div', Design::table([
                     'ID', 'Name', 'Description'
@@ -115,7 +115,7 @@ if($uri === false){
                     [
                         $uri, $app['name'], $app['description']
                     ]
-                ], 'uk-table'), ['class'=>'uk-container-center uk-overflow-container']);
+                ], false, 'uk-table'), ['class'=>'uk-container-center uk-overflow-container']);
             }
         }else if($action === 'edit'){
             $tmpl->content[] =

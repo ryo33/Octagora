@@ -1,8 +1,10 @@
 <?php
 
+$required = Design::tag('span', '◯', ['class'=>'uk-text-large']);
+
 $tmpl->add(
     Design::tag('h1', 'Octagora API v1') .
-    Design::tag('ul',
+    Design::tag('ol',
         Design::tag(['li', 'h2'], 'Introduction', ['id'=>'introduction']) .
         Design::tag('div',
             Design::tag('p', 'Octagora is a service saving texts with tags') .
@@ -12,78 +14,100 @@ $tmpl->add(
         Design::tag('div', ''
         ) .
         Design::tag(['li', 'h2'], 'Reference', ['id'=>'reference']) .
-        Design::tag('div', ''
-        )
+        Design::tag(['div', 'ul'],
+            Design::tag(['li', 'h3'], 'Messages' . Design::tag('span', '/messages', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+            Design::tag(['div', 'ul'],
+                Design::tag(['li', 'div'],
+                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get Messages' . Design::tag('span', '/', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::table(['Parameter', 'Required', 'Description', 'Default'],
+                        [
+                            ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
+                            ['ts', '', '(tags) ' . Design::link('api/1#tags', 'Detail'), '""'],
+                            ['o', '', '(order) "asc" to ascending order, "desc" to descending order', '"desc"'],
+                            ['m', '', '(max) Maximum message number', "100"],
+                            ['n', '', '(need) Select "i"(id) "t"(text) "c"(created) "ts"(tags), comma delimited', '"i,t"'],
+                            ['tn', '', '(tagneed) Select ' . Design::link('api/1#qualifier', 'tag qualifiers') . ', comma delimited', '"normal,by_user,to_user,user,message,to_message"']
+                        ], 'Parameters', 'uk-table'
+                    ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/messages?access_token=ACCESS_TOKEN&ts=dog.cat"')
+                ) .
+                Design::tag(['li', 'div'],
+                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get a Message' . Design::tag('span', '/USER_ID', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::table(['Parameter', 'Required', 'Description', 'Default'],
+                        [
+                            ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
+                            ['n', '', '(need) Select "i"(id) "t"(text) "c"(created) "ts"(tags), comma delimited', '"i,t"'],
+                            ['tn', '', '(tagneed) Select ' . Design::link('api/1#qualifier', 'tag qualifiers') . ', comma delimited', '"normal,by_user,to_user,user,message,to_message"']
+                        ], 'Parameters', 'uk-table'
+                    ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/messages/MESSAGE_ID?access_token=ACCESS_TOKEN"')
+                ) .
+                Design::tag(['li', 'div'],
+                    Design::tag('h4', Design::tag('span', 'POST', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Post a Message' . Design::tag('span', '/', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::table(['Parameter', 'Required', 'Description', 'Default'],
+                        [
+                            ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
+                            ['t', $required, '(text) message text', '-'],
+                            ['ts', '', '(tags) ' . Design::link('api/1#tags', 'Detail'), '""'],
+                        ], 'Parameters', 'uk-table'
+                    ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/messages" --data "access_token=ACCESS_TOKEN&t=Which do you prefer, cats or dogs?&ts=dog*cat"')
+                )
+            ) .
+            Design::tag(['li', 'h3'], 'Users' . Design::tag('span', '/users', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+            Design::tag(['div', 'ul'],
+                Design::tag(['li', 'div'],
+                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get a User' . Design::tag('span', '/USER_ID', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::table(['Parameter', 'Required', 'Description', 'Default'],
+                        [
+                            ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
+                            ['n', '', '(need) Select "i"(id) "n1"(name1) "n2"(name2) "c"(created), comma delimited', '"i,n1,n2"'],
+                        ], 'Parameters', 'uk-table'
+                    ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/users/USER_ID"')
+                )
+            ) .
+            Design::tag(['li', 'h3'], 'Applications' . Design::tag('span', '/application', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+            Design::tag(['div', 'ul'],
+                Design::tag(['li', 'div'],
+                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get a Application' . Design::tag('span', '/APPLICATION_ID', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::table(['Parameter', 'Required', 'Description', 'Default'],
+                        [
+                            ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
+                            ['n', '', '(need) Select "i"(id) "n"(name) "d"(description) "w"(web page) "c"(created), comma delimited', '"i,n"'],
+                        ], 'Parameters', 'uk-table'
+                    ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/applications/APPLICATION_ID"')
+                )
+            ) .
+            Design::tag(['li', 'h4'], 'Tags', ['id'=>'tags']) .
+            Design::tag('p', 'Escape \'*\', \'.\', \'!\', \'-\', \'(\', \')\', \':\', \'/\' in tag text by \'/\'.') .
+            Design::table(['Operator', 'Description'],
+                [
+                    ['*', 'AND'],
+                    ['.', 'OR'],
+                    ['!', 'NOT'],
+                    ['-', 'XOR']
+                ], 'Operators', 'uk-table'
+            ) .
+            Design::tag('ul',
+                Design::tag('li', 'Example: "a*!(b/*/./!/-/:///(/).c)*!d"') .
+                Design::tag('li', 'It means "having TAG \'a\', and not having TAG \'b*.!-:/()\' or TAG \'c\', and having TAG other than \'d\'."') .
+                Design::tag('li', '\'!\' usually means NOT. But if it locates just before a TAG, it means "having tags other than the TAG."')
+            ) .
+            Design::tag(['li', 'h4'], 'Tag Qualifiers', ['id'=>'qualifiers']) .
+            Design::table(['Qualifier', 'Type', 'Subject', 'Description'],
+                [
+                    ['normal', 'DEFAULT', 'Anything is OK', 'This will be used when it has no qualifiers. This API always omits it.'],
+                    ['year, month, day, hour, minute', 'AUTO', '4 digits for year, zero-filled 2 digits for others', 'The posting time'],
+                    ['by_user', 'AUTO', 'USER_ID', 'The user who posted'],
+                    ['user, to_user', 'OPTION', 'USER_ID', 'Relate to a user, Reply to a user'],
+                    ['message, to_message', 'OPTION', 'MESSAGE_ID', 'Relate to a message, Reply to a message'],
+                    ['application', 'AUTO', 'APPLICATION_ID', 'The posted client'],
+                    ['hash', 'OPTION', 'Anything is OK', 'Hash a string'],
+                    ['not_used', 'AUTO', 'TAG QUALIFIER', 'Not used tag qualifier']
+                ], 'Tag Qualifiers', 'uk-table'
+            ) .
+            Design::tag('ul',
+                Design::tag('li', 'Type DEFAULT will be used when it has no qualifiers.') .
+                Design::tag('li', 'Type AUTO is created by server, and unavailable when posting.') .
+                Design::tag('li', 'Type OPTION is available when posting.')
+            )
+        ), ['type'=>'I']
     )
 );
-/*
-<p></p>
-<p></p>
-<h2>Reference</h2>
-<h3>Messages<span class="uri">/messages</span></h3>
-<div id="messagesget">
-    <div id="getmessages" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span>Get Messages</h4>
-        <table class="parameters">
-            <caption>Parameters</caption>
-            <tr><th>Parameter</th><th>Required</th><th>Description</th><th>Default</th></tr>
-            <tr><td>access_token</td>   <td class="red">Yes</td>    <td>ACCESS_TOKEN</td>                                                                       <td>-</td></tr>
-            <tr><td>ts</td>             <td>No</td>                 <td>TAGS: <a href="#tags">Details</a></td>                                                  <td>""</td></tr>
-            <tr><td>o</td>              <td>No</td>                 <td>ORDER : 'asc' to ascending order, 'desc' to descending order.</td>                      <td>"desc"</td></tr>
-            <tr><td>s</td>              <td>No</td>                 <td>START: Start getting after this number.</td>                                            <td>"0"</td></tr>
-            <tr><td>m</td>              <td>No</td>                 <td>MAX: Maximum message number.</td>                                                       <td>"100"</td></tr>
-            <tr><td>n</td>              <td>No</td>                 <td>NEED: Select 'i'(id) 't'(text) 'c'(created) 'ts'(tags), comma delimited.</td>           <td>"i,t"</td></tr>
-            <tr><td>tn</td>             <td>No</td>                 <td>TAGNEED: Select tag qualifiers(<a href="#qualifier">detail</a>), comma delimited</td> <td>"normal,by_user,to_user,user,message,to_message"</td></tr>
-            <tr><td>l</td>              <td>No</td>                 <td>LAST: Exclude older than this number.</td>                                              <td>""</td></tr>
-        </table>
-    </div>
-    <div id="getamessage" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">GET</span>Get a Message</h4>
-    </div>
-</div>
-<div id="messagespost">
-    <div id="postamessage" class="request">
-        <h4><span class="uk-badge uk-badge-success uk-text-large">POST</span>Post a Message</h4>
-    </div>
-</div>
-<div id="tags">
-    <h4>Tags</h4>
-    <p>Escape '*', '.', '!', '-', '(', ')', ':', '/' in tag text by '/'.<span class="example">Example: "Example Tag(._.)" to "Example Tag/(/._/./)".</span></p>
-    <table>
-        <caption>Operators</caption>
-        <tr><th>Operator</th>   <th>Description</th></tr>
-        <tr><td>*</td>          <td>AND</td></tr>
-        <tr><td>.</td>          <td>OR</td></tr>
-        <tr><td>!</td>          <td>NOT</td></tr>
-        <tr><td>-</td>          <td>XOR</td></tr>
-    </table>
-    <p><span class="example">a*!(b.c)*!d</span></p>
-    <p>It means "having TAG 'a', and not having TAG 'b' or TAG 'c', and having TAG other than 'd'."</p>
-    <p>'~' usually means NOT. But if it locates just before a TAG, it means "having tags other than the TAG."</p>
-</div>
-<div id="qualifier">
-    <h4>Tag Qualifier</h4>
-    <p>Tag Qualifier is like "message:MESSAGE_ID".</p>
-    <table>
-        <caption>Tag Qualifiers</caption>
-        <tr><th>Tag Qualifier</th><th>Type</th><th>Subject</th><th>Description</th></tr>
-        <tr><td>normal</td><td>DEFAULT</td><th>Anything is OK.</th><td>Normal tag. You will not use this.</td></tr>
-        <tr><td>year, month, day, hour, minute</td><td>AUTO</td><th>4 digits for year, zero-filled 2 digits for others.</th><td>A posting time</td></tr>
-        <tr><td>by_user</td><td>AUTO</td><th>User_ID</th><td>User who posted.</td></tr>
-        <tr><td>user, to_user</td><td>OPTION</td><th>User_ID</th><td>Relate to a user, Reply to a user</td></tr>
-        <tr><td>message, to_message</td><td>OPTION</td><th>Message_ID</th><td>Relate to a message, Reply to a message</td></tr>
-        <tr><td>length</td><td>AUTO</td><th>integer</th><td>A text length</td></tr>
-        <tr><td>application</td><td>AUTO</td><th>Application_ID</th><td>A posted Client</td></tr>
-        <tr><td>hash</td><td>OPTION</td><th>Anything is OK.</th><td>Hash a string.</td></tr>
-        <tr><td>not_used</td><td>AUTO</td><th>Tag Qualifier</th><td>A not used tag qualifier</td></tr>
-    </table>
-    <ul>
-    <li>Type DEFAULT is used all not tag qualifiers</li>
-    <li>Type AUTO is created by server, and unavailable when posting.</li>
-    <li>Type OPTION is available when posting.</li>
-    </ul>
-</div>
-</ul>
-API
-);
- */
