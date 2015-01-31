@@ -234,6 +234,14 @@ class Application extends Model{
         $this->con->execute('DELETE FROM `access_token` WHERE `application_id` = ?', $application_id);
     }
 
+    function check_client($client_id, $client_secret){
+        $client = $this->check_client_id($client_id);
+        if($client === true || $client_secret !== $client['client_secret']){
+            return true;
+        }
+        return $client;
+    }
+
     function check_client_id($client_id){
         $result = $this->con->fetch('SELECT COUNT(`id`), `id`, `redirect`, `client_type`, `client_id`, `client_secret` FROM `application` WHERE `client_id` = BINARY ?', [$client_id]);
         if($result['COUNT(`id`)'] !== '1'){
