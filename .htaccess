@@ -3,4 +3,4 @@ IndexIgnore *
 DirectoryIndex index.php
 RewriteEngine on
 RewriteCond %{REQUEST_URI} !^/oauth/*.*$
-RewriteRule !\.(js|ico|html|css)$ index.php
+RewriteRule !\.(js|ico|html|css|png)$ index.php
