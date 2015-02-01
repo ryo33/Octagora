@@ -1,5 +1,14 @@
 <?php
 
+function random_str($length=16, $source='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'){
+    $result = '';
+    $source_length = strlen($source);
+    for($i = 0; $i < $length; $i ++){
+        $result .= $source[mt_rand(0, $source_length - 1)];
+    }
+    return $result;
+}
+
 function check_numeric($text, $length=false, $max=false){
     $num = (int)$text;
     if(ctype_digit($text) && $num !== 0 && ($max === false ? true : ($num <= $max)) && strlen($text) !== 0 && ($length === false ? true : (strlen($text) === $length))){

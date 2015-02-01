@@ -59,6 +59,10 @@ class EasySql{
         $this->prepare($sql, $arg, true);
     }
 
+    function select($table, $columns, $where){
+        return 'SELECT ' . $columns . ' FROM `' . $table . '` WHERE ' . implode(' AND ', array_map(function($a){return '`' . $a . '` = ?';}, $where));
+    }
+
     function insert($table, $columns, $values, $last_insert_id=false){
         if(!is_array($columns)){
             $columns = array($columns);
@@ -80,7 +84,17 @@ class EasySql{
             $values = array($values);
         }
         $values[] = $id;
-        $this->execute('UPDATE `' . $table . '` SET ' . implode(', ', array_map(function($a){return $a . ' = ?';}, $columns)) . ' WHERE `id` = BINARY ?', $values);
+        $this->execute('UPDATE `' . $table . '` SET ' . implode(', ', array_map(function($a){return '`' . $a . '` = ?';}, $columns)) . ' WHERE `id` = BINARY ?', $values);
+    }
+
+    function get_count($table, $where){
+        $where1 = [];
+        $where2 = [];
+        foreach($where as $key=>$item){
+            $where1[] = $key;
+            $where2[] = $item;
+        }
+        return $this->fetchColumn($this->select($table, 'COUNT(`id`)', $where1), $where2);
     }
 
 }

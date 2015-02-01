@@ -13,6 +13,7 @@ define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HT
 require DIR . 'start.php';
 require DIR . 'setting.php';
 require REQ . 'function.php';
+require REQ . 'function2.php';
 require REQ . 'ClassLoader.php';
 
 $loader = new ClassLoader();
@@ -21,7 +22,6 @@ $loader->register();
 
 $con = new EasySql($database_dsn, $database_username, $database_password);
 $req = new Request();
-
 $auth = new Auth($con);
 $application = new Application($con);
 
@@ -36,22 +36,23 @@ default:
     exit();
 }
 
-function error($error, $uri=false){
+function error($error, $uri=false, $state=false){
     if($uri === false){
         exit(json_encode(['error_message'=>$error]));
     }else{
-        redirect($uri . '?error=' . $error . '&state=' . $state);
+        if($state !== false){
+            header_remove();
+            redirect($uri . '?error=' . $error . '&state=' . $state);
+        }else{
+            header_remove();
+            redirect($uri . '?error=' . $error);
+        }
     }
 }
 
-function oauth_redirect($uri, $message, $params=false){
-    if($uri === false){
-        exit($message);
-    }
-    if($params !== false){
-        header('Location: ' . $uri . '?' . $params);
-    }else{
-        header('Location: ' . $uri);
-    }
+function oauth_redirect($uri, $params, $state=false){
+    $state = $state === false ? '' : '&state=' . $state;
+    header_remove();
+    header('Location: ' . $uri . '?' . $params . $state);
     exit();
 }

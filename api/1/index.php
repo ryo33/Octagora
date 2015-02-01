@@ -4,7 +4,7 @@ $application = new Application($con);
 
 switch($req->get_uri()){
 case 'messages':
-    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $auth_info);
     $message = new Message($con);
     if($req->request_method === REQUEST::GET){
         $uri = $req->get_uri();
@@ -26,18 +26,19 @@ case 'messages':
             );
         }
     }else if($req->get_uri() === false){
+        $app = $application->check_client_id($auth_info['application_id'];
+        $auth_info['client_type'] = $app['client_type'];
         $message->post_message($json,
             $req->get_param(TAGS, false),
             $req->get_param(TEXT, ''),
-            $user_id,
-            $client_id
+            $auth_info
         );
     }else{
         error(400, 'uri');
     }
     break;
 case 'users':
-    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $auth_info);
     if($req->request_method === REQUEST::GET){
         $uri = $req->get_uri();
         if(strlen($uri) === Model::ID_LENGTH){
@@ -53,7 +54,7 @@ case 'users':
     }
     break;
 case 'applications':
-    $auth->access($req->get_param(ACCESS_TOKEN, false), $user_id, $client_id);
+    $auth->access($req->get_param(ACCESS_TOKEN, false), $auth_info);
     if($req->request_method === REQUEST::GET){
         $uri = $req->get_uri();
         if(strlen($uri) === Model::ID_LENGTH){

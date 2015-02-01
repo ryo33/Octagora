@@ -11,7 +11,7 @@ class Message extends Model{
 
     function __construct($con){
         parent::__construct($con);
-        $this->tag_types = array(
+        $this->tag_types = array(//next is 17
             0=>'normal',
             1=>'year', 2=>'month', 3=>'day',
             4=>'hour', 5=>'minute',
@@ -19,6 +19,8 @@ class Message extends Model{
             9=>'message', 10=>'to_message',
             11=>'system',
             12=>'application',
+            15=>'grant_type',
+            16=>'client_type',
             13=>'not_used',
             14=>'hash'
         );
@@ -160,8 +162,10 @@ class Message extends Model{
         $this->format_message($json['message'], $message, $needs, $tso);
     }
 
-    function post_message(&$json, $ts, $text, $user_id, $client_id){
-        global $now;
+    function post_message(&$json, $ts, $text, $auth_info){
+        global $now, $microtime;
+        $user_id = $auth_info['user_id'];
+        $client_id = $auth_info['application_id'];
         $tags = array();
         if(strlen($text) === 0 || mb_strlen($text) > self::TEXT_MAX){
             error(400, 'text length');
@@ -190,7 +194,7 @@ class Message extends Model{
             }
         }
         $message_id = parent::create_id('message');
-        parent::insert('message', array('id', 'text'), array($message_id, $text));
+        parent::insert('message', array('id', 'text', 'created'), array($message_id, $text, $microtime));
         foreach($tags as $tag){
             parent::insert('tagging', array('tag_id', 'message_id'), array($tag, $message_id));
         }
@@ -200,6 +204,8 @@ class Message extends Model{
         $autotags[] = $this->get_tag_id('hour:' . $now->format('H'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('minute:' . $now->format('i'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('application:' . $client_id, $type); $types[$type] = true;
+        $autotags[] = $this->get_tag_id('grant_type:' . $auth_info['type'], $type); $types[$type] = true;
+        $autotags[] = $this->get_tag_id('client_type:' . $auth_info['client_type'], $type); $types[$type] = true;
         if($user_id !== false){
             $autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
         }
@@ -472,6 +478,16 @@ class Message extends Model{
         case $this->tag_types_key['application']:
             if($application->is_exists($escaped_tag) !== true){
                 error(400, 'special tag application');
+            }
+            break;
+        case $this->tag_types_key['grant_type']:
+            if(check_numeric($escaped_tag, 1, Auth::GT_MAX)){
+                error(400, 'special tag grant_type');
+            }
+            break;
+        case $this->tag_types_key['client_type']:
+            if(check_numeric($escaped_tag, 1, Application::CT_MAX)){
+                error(400, 'special tag client_type');
             }
             break;
         }

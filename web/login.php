@@ -10,23 +10,7 @@ switch($action){
 case false:
 case 'login':
     $tmpl->content[] =
-        Design::form_start('login', 'users', 'POST') .
-        Design::form_incorrect($req->get_param('message', '')) .
-        Design::form_input([
-            'placeholder'=>'User Name',
-            'name'=>'name',
-            'required'=>true,
-            'type'=>'text'
-        ]) .
-        Design::form_input([
-            'placeholder'=>'Password',
-            'name'=>'password',
-            'required'=>true,
-            'type'=>'password'
-        ]) .
-        Design::form_submit('Login') .
-        Design::signup_bottom() .
-        Design::form_end();
+        Design::login_form($req->get_param('message', ''));
     break;
 case 'new':
     $tmpl->content[] =

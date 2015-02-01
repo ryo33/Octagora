@@ -9,6 +9,29 @@ class Design{
         return '';
     }
 
+    static function login_form($message, $url=false){
+        return Design::form_start('login', 'users', 'POST') .
+        Design::form_incorrect($message) .
+        Design::form_input([
+            'placeholder'=>'User Name',
+            'name'=>'name',
+            'required'=>true,
+            'type'=>'text'
+        ]) .
+        Design::form_input([
+            'placeholder'=>'Password',
+            'name'=>'password',
+            'required'=>true,
+            'type'=>'password'
+        ]) .
+        Design::form_submit('Login') .
+        Design::login_bottom($url) .
+        Design::form_end();
+    }
+
+    static function credential_form($application){
+    }
+
     /**
      * required
      * placeholder
@@ -67,8 +90,12 @@ class Design{
         return '<div class="uk-form-row"><button class="uk-width-1-1 uk-button uk-button-primary uk-button-large" type="submit">' . $text . '</button></div>';
     }
 
-    static function signup_bottom(){
-        return '<div class="uk-form-row uk-text-small"><label class="uk-float-left"><input name="remember" type="checkbox" />Remember Me</label><a class="uk-float-right uk-link" href="' . URL . '/users?action=new">Sign Up</a></div>';
+    static function login_bottom($url=false){
+        if($url === false){
+            return '<div class="uk-form-row uk-text-small"><label class="uk-float-left"><input name="remember" value="true" type="checkbox" />Remember Me</label><a class="uk-float-right uk-link" href="' . URL . 'users?action=new">Sign Up</a></div>';
+        }else{
+            return '<div class="uk-form-row uk-text-small"><label class="uk-float-left"><input name="remember" value="true" type="checkbox" />Remember Me</label><a class="uk-float-right uk-link" href="' . URL . $url . '?action=new">Sign Up</a></div>';
+        }
     }
 
     static function form_start($form_name, $url, $method){

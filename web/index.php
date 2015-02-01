@@ -31,12 +31,7 @@ case 'users':
         $action = $req->get_param(ACTION, false);
         $token = $req->get_param(TOKEN, '');
         if($action === false){//login
-            check_token('login', $token);
-            $result = $user->check_login($req->get_param('name', ''), $req->get_param('password', ''));
-            if($result === true){
-                redirect('users?message=incorrect');
-            }
-            $se->login($result);
+            do_login($se, $req, $user, $token);
             redirect(URL);
         }else if($action === 'new'){//signup
             check_token('signup', $token);

@@ -1,5 +1,5 @@
 <?php
-$microtime = (int) microtime(true) * 1000;
+$microtime = (int) (microtime(true) * 1000);
 $now = new DateTime('now', new DateTimeZone('GMT'));
 
 mb_internal_encoding('UTF-8');
@@ -12,6 +12,7 @@ define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HT
 
 require DIR . 'start.php';
 require REQ . 'function.php';
+require REQ . 'function2.php';
 require DIR . 'setting.php';
 require REQ . 'ClassLoader.php';
 
@@ -35,6 +36,7 @@ define('ERROR', 'error');
 define('ACTION', 'action');
 define('TOKEN', '_Token');
 
+define('AUTO_LOGIN', 'remember');
 define('DEBUG', false);
 
 $con = new EasySql($database_dsn, $database_username, $database_password);
@@ -50,6 +52,8 @@ if(DEBUG){
 
 try{
     ob_start();
+
+    login();
 
     if($se->check_login($user)){
         $tmpl->add_navbar(Design::tag('li', Design::link('users', 'User Page')));

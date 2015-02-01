@@ -39,6 +39,7 @@ class Session{
     function logout(){
         $this->set('_login_', false);
         $this->regenerate();
+        remove_auto();
     }
 
     function check_login($user){
