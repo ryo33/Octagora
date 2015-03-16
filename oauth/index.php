@@ -56,3 +56,35 @@ function oauth_redirect($uri, $params, $state=false){
     header('Location: ' . $uri . '?' . $params . $state);
     exit();
 }
+
+function get_app(){
+    global $_SERVER, $client_id, $client_secret, $application;
+    //dump($_SERVER, true);
+    if(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])){
+        $client_id = $_SERVER['PHP_AUTH_USER'];
+        $client_secret = $_SERVER['PHP_AUTH_PW'];
+        $result = $application->check_client($client_id, $client_secret);
+        if($result === true){
+            error('client certification');
+        }else if($result['client_type'] === Application::TYPE_PUBLIC){
+            error('Application Type');
+        }
+    }else if($client_id !== false && $client_secret !== false){
+        $result = $application->check_client($client_id, $client_secret);
+        if($result === true){
+            error('client certification');
+        }else if($result['client_type'] === Application::TYPE_PUBLIC){
+            error('Application Type');
+        }
+    }else if($client_id !== false){
+        $result = $application->check_client_id($client_id);
+        if($result === true){
+            error('client_id');
+        }else if($result['client_type'] === Application::TYPE_CONFIDENTIAL){
+            error('Application Type');
+        }
+    }else{
+        error('client_id');
+    }
+    return $result;
+}

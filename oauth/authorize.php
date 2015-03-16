@@ -1,36 +1,5 @@
 <?php
 
-function get_app(){
-    global $_SERVER, $client_id, $client_secret, $application;
-    if(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])){
-        $client_id = $_SERVER['PHP_AUTH_USER'];
-        $client_secret = $_SERVER['PHP_AUTH_PW'];
-        $result = $application->check_client($client_id, $client_secret);
-        if($result === true){
-            error('client certification');
-        }else if($result['client_type'] === Application::TYPE_PUBLIC){
-            error('Application Type');
-        }
-    }else if($client_id !== false && $client_secret !== false){
-        $result = $application->check_client($client_id, $client_secret);
-        if($result === true){
-            error('client certification');
-        }else if($result['client_type'] === Application::TYPE_PUBLIC){
-            error('Application Type');
-        }
-    }else if($client_id !== false){
-        $result = $application->check_client_id($client_id);
-        if($result === true){
-            error('client_id');
-        }else if($result['client_type'] === Application::TYPE_CONFIDENTIAL){
-            error('Application Type');
-        }
-    }else{
-        error('client_id');
-    }
-    return $result;
-}
-
 header('Content-Type: application/json; charset=utf-8');
 
 $se = new Session();
@@ -38,7 +7,7 @@ $user = new User($con);
 
 $token = $req->get_param('token', false);
 if($token === false){
-    $responce_type = $req->get_param('responce_type', false);
+    $response_type = $req->get_param('response_type', false);
     $client_id = $req->get_param('client_id', false);
     $redirect_uri = $req->get_param('redirect_uri', false);
     $scope = $req->get_param('scope', false);
@@ -50,7 +19,7 @@ if($token === false){
     if($redirect_uri !== false && $app['redirect'] !== $app['redirect']){
         error('invalid_request', $app['redirect'], $state);
     }
-    if($responce_type === false){
+    if($response_type === false){
         error('invalid_request', $app['redirect'], $state);
     }
     if($scope !== false && $scope !== 'post'){
@@ -79,7 +48,7 @@ if($token === false){
 }
 
 $content = '';
-switch($responce_type){
+switch($response_type){
 case 'code':
     login();
     if($se->is_login){

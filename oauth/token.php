@@ -1,36 +1,5 @@
 <?php
 
-function get_app(){
-    global $_SERVER, $client_id, $client_secret, $application;
-    if(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])){
-        $client_id = $_SERVER['PHP_AUTH_USER'];
-        $client_secret = $_SERVER['PHP_AUTH_PW'];
-        $result = $application->check_client($client_id, $client_secret);
-        if($result === true){
-            error('client certification');
-        }else if($result['client_type'] === Application::TYPE_PUBLIC){
-            error('Application Type');
-        }
-    }else if($client_id !== false && $client_secret !== false){
-        $result = $application->check_client($client_id, $client_secret);
-        if($result === true){
-            error('client certification');
-        }else if($result['client_type'] === Application::TYPE_PUBLIC){
-            error('Application Type');
-        }
-    }else if($client_id !== false){
-        $result = $application->check_client_id($client_id);
-        if($result === true){
-            error('client_id');
-        }else if($result['client_type'] === Application::TYPE_CONFIDENTIAL){
-            error('Application Type');
-        }
-    }else{
-        error('client_id');
-    }
-    return $result;
-}
-
 $grant_type = $req->get_param('grant_type', false);
 $client_id = $req->get_param('client_id', false);
 $client_secret = $req->get_param('client_secret', false);
@@ -116,8 +85,25 @@ case 'authorization_code':
     $redirect_uri = $req->get_param('redirect_uri', false);
     $code = $req->get_param('code', false);
     $scope = $req->get_param('scope', false);
+    $auth_code = $auth->check_auth_code($code, $app['id']);
+    $result = $auth->create_access_token([
+        'type'=>Auth::AT_CODE,
+        'application_id'=>$app['id'],
+        'user_id'=>$auth_code['user_id']
+    ]);
+    exit(json_encode([
+        'access_token'=>$result[0],
+        'expires_in'=>Auth::AT_LIMIT,
+        'refresh_token'=>$result[1]
+    ]));
+    break;
+case 'refresh_token':
+    $refresh_token = $req->get_param('refresh_token', false);
+    if($refresh_token === false){
+        error(400, 'invalid_request');
+    }
     break;
 default:
-    exit('grant_type');
+    error(400, 'invalid_request');
 }
 exit();

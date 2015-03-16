@@ -5,6 +5,8 @@ class Application extends Model{
     const TYPE_CONFIDENTIAL = '0';
     const TYPE_PUBLIC = '1';
 
+    const CT_MAX = 1;
+
     const NAME_MAX = 128;
     const DESCRIPTION_MAX = 512;
     const URL_MAX = 512;

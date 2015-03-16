@@ -26,8 +26,8 @@ case 'messages':
             );
         }
     }else if($req->get_uri() === false){
-        $app = $application->check_client_id($auth_info['application_id'];
-        $auth_info['client_type'] = $app['client_type'];
+        $app = $application->check_client_id($auth_info['application_id']);
+        $auth_info['client_type'] = $application->get_application($auth_info['application_id'], true)['client_type'];
         $message->post_message($json,
             $req->get_param(TAGS, false),
             $req->get_param(TEXT, ''),

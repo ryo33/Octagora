@@ -39,4 +39,6 @@ function do_login(&$se, &$req, &$user, $token){
         auto_login($result);
     }
     $se->login($result);
+    $se->remove('access_token');
+    $se->remove('refresh_token');
 }

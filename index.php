@@ -8,7 +8,9 @@ mb_http_output('UTF-8');
 
 define('DIR', dirname(__FILE__) . '/');
 define('REQ', DIR . 'require/');
-define('URL', (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . '/');
+define('URL_HEAD', empty($_SERVER['HTTPS']) ? 'http://' : 'https://');
+define('URL_BODY', $_SERVER["HTTP_HOST"] . '/');
+define('URL', URL_HEAD . URL_BODY);
 
 require DIR . 'start.php';
 require REQ . 'function.php';
@@ -83,7 +85,7 @@ try{
 
 function quit($error=false){
     global $req, $res, $is_api;
-    if($error === false){
+    if($is_api && $error === false){
         if($req->check_param() === true){
             error(400, 'unused parameter');
         }
@@ -109,10 +111,10 @@ function error($status, $message, $log=false){
             http_response_code($status);
         }
         $json['status'] = "$status";
-        $json['message'] = "$message";
+        $json['error'] = "$message";
         $res->content = [json_encode($json)];
     }else{
-        redirect();
+        redirect('?reload=true');
     }
     if($log !== false || !$is_api || DEBUG){
         $con->insert('error_log', array('status', 'message', 'text', 'created'), array($status, $message, $log, now()->format('Y:m:d H:i:s')));

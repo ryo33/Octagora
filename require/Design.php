@@ -2,6 +2,29 @@
 
 class Design{
 
+    static $message_count = 0;
+    const show_tags = 'Show Tags';
+    const hide_tags = 'Hide Tags';
+
+    static function message_panel($message, $source_data=[]){
+        self::$message_count ++;
+        $tags = '';
+        if(count($message['ts']) > 0){
+            $tags .= self::tag('div',
+                implode('', array_map(function($a){
+                    return Design::tag('a', $a, ['class'=>'uk-button uk-button-small', 'href'=>URL . '?' . 'ts=' . $a]);
+                }, $message['ts']))
+                    , ['id'=>'tag' . self::$message_count, 'style'=>'display: none;']) .
+                    self::tag('button', self::show_tags, ['id'=>'message' . self::$message_count, 'class'=>'uk-button']);
+        }
+        $result = self::tag('div',
+            //            Design::tag('h3', '') .
+            Design::tag('div', $message['t']) . $tags
+            , ['class'=>'uk-panel uk-panel-box uk-panel-box-hover']) .
+            Script::switch_id('tag' . self::$message_count, 'message' . self::$message_count, self::show_tags, self::hide_tags, false);
+        return $result;
+    }
+
     static function form_incorrect($message){
         if($message !== false){
             return '<div class="uk-form-row"><p class="uk-text-danger">' . $message . '</p></div>';
@@ -61,13 +84,15 @@ class Design{
     static function form_textarea($form){
         $required = isset($form['required']) ? ' required' : '';
         $placeholder = isset($form['placeholder']) ? ' placeholder="' . $form['placeholder'] . '"' : '';
+        $id = isset($form['id']) ? ' id="' . $form['id'] . '"' : '';
+        $name = isset($form['name']) ? ' name="' . $form['name'] . '"' : '';
         $value = isset($form['value']) ? $form['value'] : '';
         if(isset($form['label'])){
             $label = '<p>' . $form['label'] . '</p>';
         }else{
             $label = '';
         }
-        return self::tag('div', $label . '<textarea class="uk-width-1-1" name="' . $form['name'] . $placeholder . $required . '">' . $value . '</textarea>', ['class'=>'uk-form-row uk-text-left']);
+        return self::tag('div', $label . '<textarea class="uk-width-1-1"' . $name . $id . $placeholder . $required . '>' . $value . '</textarea>', ['class'=>'uk-form-row uk-text-left']);
     }
 
     /**
@@ -86,8 +111,12 @@ class Design{
         return self::tag('div', $label . '<select name="' . $form['name'] . '"' . $required . '>' . implode('', array_map(function($a){return '<option>' . $a . '</option>';}, $form['options'])) . '</select>', ['class'=>'uk-form-row uk-text-left']);
     }
 
-    static function form_submit($text){
-        return '<div class="uk-form-row"><button class="uk-width-1-1 uk-button uk-button-primary uk-button-large" type="submit">' . $text . '</button></div>';
+    static function form_submit($text, $option=[]){
+        $options = '';
+        foreach($option as $key=>$o){
+            $options .= ' ' . $key . '="' . $o . '"';
+        }
+        return '<div class="uk-form-row"><button' . $options . ' class="uk-width-1-1 uk-button uk-button-primary uk-button-large" type="submit">' . $text . '</button></div>';
     }
 
     static function login_bottom($url=false){
@@ -99,7 +128,7 @@ class Design{
     }
 
     static function form_start($form_name, $url, $method){
-        return '<form class="uk-panel uk-panel-box uk-form uk-container-center" action="' . URL . $url . '" method="' . $method . '"><input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />';
+        return '<form class="uk-panel uk-panel-box uk-form uk-container-center" action="' . URL . $url . '" method="' . $method . '">' . ($form_name === false ? '' : '<input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />');
     }
 
     static function form_end(){
@@ -108,8 +137,13 @@ class Design{
 
     static function tag($tag, $text, $option=[]){
         $options = '';
+        $close = true;
         foreach($option as $key=>$o){
-            $options .= ' ' . $key . '="' . $o . '"';
+            if($key === 'close'){
+                $close = $o;
+            }else{
+                $options .= ' ' . $key . '="' . $o . '"';
+            }
         }
         if(is_array($tag)){
             if(count($tag) > 1){
@@ -121,7 +155,7 @@ class Design{
                 $tag = $tag[0];
             }
         }
-        return '<' . $tag . $options . '>' . $text . '</' . $tag . '>';
+        return '<' . $tag . $options . '>' . $text . ($close ? '</' . $tag . '>' : '');
     }
 
     static function link($url, $text, $class=false){

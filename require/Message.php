@@ -112,7 +112,7 @@ class Message extends Model{
                 if(count($types) === 0){
                     error(400, 'tag option');
                 }
-                $tags = $this->con->fetchAll('SELECT `type`, `text` FROM `tag` WHERE `id` in (SELECT `tag_id` FROM `tagging` WHERE `message_id` = BINARY ?) AND `type` in (\'' . implode('\', \'', $types) . '\') ORDER BY `id`', $message['id']);
+                $tags = $this->con->fetchAll('SELECT `tag`.`text`, `tag`.`type` FROM `tag` INNER JOIN `tagging` ON `tag`.`id` = `tagging`.`tag_id` WHERE `tagging`.`message_id` = ? AND `tag`.`type` in (\'' . implode('\', \'', $types) . '\') ORDER BY `tag`.`type`', $message['id']);
                 $json['ts'] = array();
                 foreach($tags as $tag){
                     $json['ts'][] = $tag['type'] === '0' ? $tag['text'] : $this->tag_types[$tag['type']] . ':' . $tag['text'];
@@ -193,11 +193,6 @@ class Message extends Model{
                 }
             }
         }
-        $message_id = parent::create_id('message');
-        parent::insert('message', array('id', 'text', 'created'), array($message_id, $text, $microtime));
-        foreach($tags as $tag){
-            parent::insert('tagging', array('tag_id', 'message_id'), array($tag, $message_id));
-        }
         $autotags[] = $this->get_tag_id('year:' . $now->format('Y'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('month:' . $now->format('m'), $type); $types[$type] = true;
         $autotags[] = $this->get_tag_id('day:' . $now->format('d'), $type); $types[$type] = true;
@@ -208,6 +203,11 @@ class Message extends Model{
         $autotags[] = $this->get_tag_id('client_type:' . $auth_info['client_type'], $type); $types[$type] = true;
         if($user_id !== false){
             $autotags[] = $this->get_tag_id('by_user:' . $user_id, $type); $types[$type] = true;
+        }
+        $message_id = parent::create_id('message');
+        parent::insert('message', array('id', 'text', 'created'), array($message_id, $text, $microtime));
+        foreach($tags as $tag){
+            parent::insert('tagging', array('tag_id', 'message_id'), array($tag, $message_id));
         }
         foreach($this->tag_types as $tag_type){
             if($tag_type !== 'not_used' && array_key_exists($this->tag_types_key[$tag_type], $types) === false){
@@ -456,12 +456,12 @@ class Message extends Model{
             }
             break;
         case $this->tag_types_key['month']:
-            if(check_numeric($escaped_tag, 2, 12)){
+            if(check_numeric($escaped_tag, 2, 12, 1)){
                 error(400, 'special tag month');
             }
             break;
         case $this->tag_types_key['day']:
-            if(check_numeric($escaped_tag, 2, 31)){
+            if(check_numeric($escaped_tag, 2, 31, 1)){
                 error(400, 'special tag day');
             }
             break;

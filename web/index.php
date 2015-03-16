@@ -61,6 +61,7 @@ case 'logout':
     $se->logout();
     redirect(URL);
 default:
+    require DIR . 'web/webapp.php';
     break;
 }
 

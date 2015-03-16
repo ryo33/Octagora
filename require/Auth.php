@@ -1,11 +1,14 @@
 <?php
 
 class Auth extends Model{
+    const STATE_MAX_LENGTH = 64;
 
     const CREDENTIAL_LIMIT = 180;//3 minutes
     const AT_LIMIT = 1800;//30 minutes
 
     const TOKEN_LENGTH = 32;
+
+    const AC_CODE_LENGTH = 32;
 
     const GT_MIN = 0;//min
     const AT_CODE = '0';
@@ -16,7 +19,7 @@ class Auth extends Model{
 
     const AC_NOT_AVAILABLE = '0';
     const AC_AVAILABLE = '1';
-    const AC_USED = '2';
+    const AC_OLD = '2';
 
     public static $token_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 
@@ -34,36 +37,54 @@ class Auth extends Model{
         return $token;
     }
 
-    function update_auth_code_token($application_id, $token){
-        $result = $con->fetch($con->select('auth_code', 'COUNT(`id`), `id`, `application_id`', ['token', 'application_id', 'status']), [$token, $application_id, self::AC_NOT_AVAILABLE]);
-        if($result['COUNT(`id`)'] !== '1'){
-            exit();
-        }
-        $token = $this->create_auth_code_token($application_id);
-        $con->update('auth_code', ['token'], $token);
-        return [$token, $result['id']];
+    function activate_auth_code($token, $application_id, $user_id){
+        $this->con->execute('UPDATE `auth_code` SET `status` = ? WHERE `application_id` = ? AND `user_id` = ?', [self::AC_OLD, $application_id, $user_id]);
+        $this->con->update('auth_code', $this->get_auth_code($token)['id'], ['user_id'=>$user_id, 'status'=>self::AC_AVAILABLE, 'code'=>$this->create_auth_code_code($application_id)]);
     }
 
-    function get_auth_code($code){
-        //TODO
+    function get_auth_code($token){
+        return $this->con->fetch('SELECT `id`, `code`, `state`, `status`, `application_id`, `user_id` FROM `auth_code` WHERE `token` = ?', $token);
+    }
+
+    function check_auth_code($code, $application_id){
+        $result = $this->con->fetch('SELECT COUNT(`id`), `user_id` FROM `auth_code` WHERE `status` = ? AND `code` = ? AND `application_id` = ?', [self::AC_AVAILABLE, $code, $application_id]);
+        if($result['COUNT(`id`)'] !== '1'){
+            error('invalid_request');
+        }
+        return $result;
+    }
+
+    function create_auth_code_code($application_id){
+        do{
+            $code = random_str(self::AC_CODE_LENGTH);
+        }while($this->con->get_count('auth_code', ['code'=>$code, 'application_id'=>$application_id]) !== '0');
+        return $code;
     }
 
     function create_auth_code_token($application_id){
         do{
             $token = random_str();
-        }while($con->get_count('auth_code', ['token'=>$token, 'application_id'=>$application_id]) !== '0');
+        }while($this->con->get_count('auth_code', ['token'=>$token, 'application_id'=>$application_id]) !== '0');
         return $token;
+    }
+
+    function update_auth_code_token($application_id, $token){
+        $result = $this->con->fetch($this->con->select('auth_code', 'COUNT(`id`), `id`, `application_id`', ['token', 'application_id', 'status']), [$token, $application_id, self::AC_NOT_AVAILABLE]);
+        if($result['COUNT(`id`)'] !== '1'){
+            exit();
+        }
+        $token = $this->create_auth_code_token($application_id);
+        $this->con->update('auth_code', $result, ['token' => $token]);
+        return [$token, $result['id']];
     }
 
     function update_access_token($args){
         switch($args['type']){
         case self::AT_CODE:
-            break;
         case self::AT_TOKEN:
-            break;
         case self::AT_PASSWORD:
-            $access = $this->get_access_token($access_token);
-            if($this->check_at_limit($access['created'])){
+            $access = $this->get_access_token_from_refresh_token($access_token);
+            if($access !== true && $this->check_at_limit($access['created'])){
                 $access_token = $this->create_token('access_token');
                 $refresh_token = $this->create_token('refresh_token');
                 parent::update('access_token', $access['id'], ['access_token', 'refresh_token'], [$access_token, $refresh_token]);
@@ -74,6 +95,14 @@ class Auth extends Model{
         case self::AT_CLIENT:
             return true;
         }
+    }
+
+    function get_access_token_from_refresh_token($refresh_token){
+        $result = $this->con->fetch('SELECT COUNT(`id`), `id`, `type`, `user_id`, `application_id`, `access_token`, `created` FROM `access_token` WHERE `refresh_token` = BINARY ?', $refresh_token);
+        if($result['COUNT(`id`)'] !== '1'){
+            return true;
+        }
+        return $result;
     }
 
     function get_access_token($access_token){
@@ -91,7 +120,7 @@ class Auth extends Model{
     }
 
     function check_credential($application_id, $user_id){
-        if($con->get_count('credential', ['application_id'=>$app['id'], 'user_id'=>$user->user_id]) === '1'){
+        if($this->con->get_count('credential', ['application_id'=>$application_id, 'user_id'=>$user_id]) === '1'){
             return true;
         }
         return false;
@@ -103,6 +132,11 @@ class Auth extends Model{
         };
         switch($args['type']){
         case self::AT_CODE:
+            $access_token = $this->create_token('access_token');
+            $refresh_token = $this->create_token('refresh_token');
+            parent::insert('access_token', ['type', 'application_id', 'access_token', 'refresh_token', 'user_id'],
+                [$args['type'], $args['application_id'], $access_token, $refresh_token, $args['user_id']]);
+            return [$access_token, $refresh_token];
             break;
         case self::AT_TOKEN:
             break;
@@ -110,7 +144,6 @@ class Auth extends Model{
             $this->create_credential($args['application_id'], $args['user_id']);
             $access_token = $this->create_token('access_token');
             $refresh_token = $this->create_token('refresh_token');
-            $remove_access_token($args['application_id'], $args['user_id']);
             parent::insert('access_token', ['type', 'application_id', 'access_token', 'refresh_token', 'user_id'],
                 [$args['type'], $args['application_id'], $access_token, $refresh_token, $args['user_id']]);
             return [$access_token, $refresh_token];
@@ -142,27 +175,31 @@ class Auth extends Model{
     function access($access_token, &$auth_info){
         $access = $this->get_access_token($access_token);
         if($access === true){
-            error(400, 'wrong access_token');
+            error(400, Error::wrong_access_token);
         }else{
             switch($access['type']){
-            case self::AT_CODE: exit();
             case self::AT_TOKEN:
-                exit();
-            case self::AT_PASSWORD:
                 if($this->check_at_limit($access['created'])){
-                    error(400, 'old access_token');
+                    error(400, Error::old_access_token);
                 }
                 $auth_info = $access;
-                return;
+                break;
+            case self::AT_CODE:
+            case self::AT_PASSWORD:
+                if($this->check_at_limit($access['created'])){
+                    error(400, Error::old_access_token);
+                }
+                $auth_info = $access;
+                break;
             case self::AT_CLIENT:
                 if($this->check_at_limit($access['created'])){
-                    $this->con->execute('DELETE FROM `access_token` WHERE `id` = ?', $access['id']);
-                    error(400, 'old access_token');
+                    error(400, Error::old_access_token);
                 }
                 $auth_info = $access;
                 $auth_info['user_id'] = false;
-                return;
+                break;
             }
+            return;
         }
     }
 

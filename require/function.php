@@ -1,5 +1,35 @@
 <?php
 
+function curl($uri, $data=[], $post=false, $basic=false){
+    global $webapp_client_id, $webapp_client_secret;
+    $uri = URL . $uri;
+    if($post === false){
+        $curl = curl_init($uri . '?' . http_build_query($data));
+    }else{
+        $curl = curl_init($uri);
+        curl_setopt($curl, CURLOPT_POST, TRUE);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+    }
+    curl_setopt($curl, CURLOPT_SSLVERSION, 3);
+    if($basic !== false){
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($curl, CURLOPT_USERPWD, $a = $webapp_client_id . ':' . $webapp_client_secret);
+    }
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
+    return json_decode(curl_exec($curl), true || curl_close($curl));
+}
+
+function dump($var, $error_log=false){
+    ob_start();
+    var_dump($var);
+    if($error_log === false){
+        return ob_get_clean();
+    }else{
+        error_log(ob_get_clean());
+    }
+}
+
 function random_str($length=16, $source='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'){
     $result = '';
     $source_length = strlen($source);
@@ -9,9 +39,9 @@ function random_str($length=16, $source='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm
     return $result;
 }
 
-function check_numeric($text, $length=false, $max=false){
+function check_numeric($text, $length=false, $max=false, $min=0){
     $num = (int)$text;
-    if(ctype_digit($text) && $num !== 0 && ($max === false ? true : ($num <= $max)) && strlen($text) !== 0 && ($length === false ? true : (strlen($text) === $length))){
+    if(ctype_digit($text) && ($max === false ? true : ($num <= $max)) && strlen($text) !== 0 && ($length === false ? true : (strlen($text) === $length)) && ($min === false ? true : $num >= $min)){
         return false;
     }
     return true;
@@ -59,9 +89,17 @@ function echoh($text){
 
 function redirect($url=''){
     if(DEBUG){
-        error_log($url);
+        error_log('redirect' . $url);
     }
     header('Location: ' . URL . $url);
+    exit();
+}
+
+function redirect_uri($url=''){
+    if(DEBUG){
+        error_log('redirect' . $url);
+    }
+    header('Location: ' . $url);
     exit();
 }
 

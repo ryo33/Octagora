@@ -5,10 +5,12 @@ class EasySql{
     private $fetch_mode = PDO::FETCH_ASSOC;
     private $debug = false;
 
-    function __construct($dsn, $user, $password, $fetch_mode=PDO::FETCH_ASSOC){
+    function __construct($dsn, $user, $password, $fetch_mode=PDO::FETCH_ASSOC, $utf=true){
         $this->pdo = new PDO($dsn, $user, $password);
         $this->fetch_mode = $fetch_mode;
-        $this->pdo->exec('SET NAMES utf8');
+        if($utf){
+            $this->pdo->exec('SET NAMES utf8');
+        }
     }
 
     function prepare($sql, $arg=null, $exec=false){
@@ -76,12 +78,10 @@ class EasySql{
         }
     } 
 
-    function update($table, $id, $columns, $values){
-        if(!is_array($columns)){
-            $columns = array($columns);
-        }
-        if(!is_array($values)){
-            $values = array($values);
+    function update($table, $id, $pairs){
+        foreach($pairs as $key => $value){
+            $columns[] = $key;
+            $values[] = $value;
         }
         $values[] = $id;
         $this->execute('UPDATE `' . $table . '` SET ' . implode(', ', array_map(function($a){return '`' . $a . '` = ?';}, $columns)) . ' WHERE `id` = BINARY ?', $values);

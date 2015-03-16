@@ -12,6 +12,7 @@ class Session{
         if(isset($_SESSION[$name])){
             return $_SESSION[$name];
         }
+        return $default;
     }
 
     function set($name, $value){
@@ -37,6 +38,8 @@ class Session{
     }
 
     function logout(){
+        $this->remove('access_token');
+        $this->remove('refresh_token');
         $this->set('_login_', false);
         $this->regenerate();
         remove_auto();
@@ -50,7 +53,7 @@ class Session{
             return true;
         }else{
             $this->is_login = false;
-            $this->logout();
+//            $this->logout();
             return false;
         }
     }
