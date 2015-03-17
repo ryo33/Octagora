@@ -97,12 +97,7 @@ function get_messages($access_token, $request_data){
     if(is_string($access_token)){
         preg_match_all('/message:(.{' . Model::ID_LENGTH . '})/', $request_data[FORM_TAGS], $result);
         foreach($result[1] as $message_id){
-            $data = [
-                ACCESS_TOKEN=>$access_token,
-                NEEDS=>'t,ts',
-                TAGS_OPTION=>$req->get_param(TAGS_OPTION, 'normal,by_user,to_user,user,message,to_message,year,month,day,hour,minute,hash,not_used')
-            ];
-            $content = curl('api/1/messages/' . $message_id, $data);
+            $content = get_message($access_token, $message_id);
             if($content['status'] === 200){
                 $content['class'] = 'uk-panel-box-primary';
                 $result_text .= Design::message_panel($content, $request_data);
@@ -149,4 +144,16 @@ function get_messages($access_token, $request_data){
         return $result_text;
     }
     return $result_text;
+}
+
+function get_message($access_token, $message_id){
+    global $req;
+    $data = [
+        ACCESS_TOKEN=>$access_token,
+        NEEDS=>'t,ts',
+        TAGS_OPTION=>$req->get_param(TAGS_OPTION, 'normal,by_user,to_user,user,message,to_message,year,month,day,hour,minute,hash,not_used')
+    ];
+    $message = curl('api/1/messages/' . $message_id, $data);
+    $message['i'] = $message_id;
+    return $message;
 }

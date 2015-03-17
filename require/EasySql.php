@@ -14,7 +14,6 @@ class EasySql{
     }
 
     function prepare($sql, $arg=null, $exec=false){
-        error_log($sql);
         if($this->debug){
             error_log($sql);
         }

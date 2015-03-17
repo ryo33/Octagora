@@ -7,6 +7,7 @@ class Design{
     const hide_tags = 'Hide';
 
     static function message_panel($message, $source_data=[]){
+        dump($message, true);
     $tag_class = 'uk-button uk-button-small uk-margin-small-bottom uk-margin-small-right';
         self::$message_count ++;
         $tags = '';
@@ -17,15 +18,15 @@ class Design{
             $buttons1 = ['to_message:' . $message['i'], 'message:' . $message['i']];
             //post tags
             foreach($buttons1 as $a){
-                $tmp .= Design::tag('a', 'POST ' . $a, ['class'=>'uk-button-primary ' . $tag_class, 'href'=>URL . '?' . POST_TAGS . '=' . $a . $source_data]); 
+                $tmp .= Design::tag('a', 'POST ' . $a, ['class'=>'uk-button-primary ' . $tag_class, 'href'=>URL . 'messages?' . POST_TAGS . '=' . $a . $source_data]); 
             }
             //form tags
             foreach($buttons1 as $a){
-                $tmp .= Design::tag('a', $a, ['class'=>'uk-button-success ' . $tag_class, 'href'=>URL . '?' . FORM_TAGS . '=' . $a . $source_data]);
+                $tmp .= Design::tag('a', $a, ['class'=>'uk-button-success ' . $tag_class, 'href'=>URL . 'messages?' . FORM_TAGS . '=' . $a . $source_data]);
             }
             //tags
             foreach($message['ts'] as $a){
-                $tmp .= Design::tag('a', $a, ['class'=>$tag_class, 'href'=>URL . '?' . FORM_TAGS . '=' . $a . $source_data]);
+                $tmp .= Design::tag('a', $a, ['class'=>$tag_class, 'href'=>URL . 'messages?' . FORM_TAGS . '=' . $a . $source_data]);
             }
             $tags .= self::tag('div',
                 $tmp
