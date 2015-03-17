@@ -10,14 +10,14 @@ function curl($uri, $data=[], $post=false, $basic=false){
         curl_setopt($curl, CURLOPT_POST, TRUE);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
     }
-    curl_setopt($curl, CURLOPT_SSLVERSION, 3);
     if($basic !== false){
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, $a = $webapp_client_id . ':' . $webapp_client_secret);
+        curl_setopt($curl, CURLOPT_USERPWD, $webapp_client_id . ':' . $webapp_client_secret);
     }
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
-    return json_decode(curl_exec($curl), true || curl_close($curl));
+    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
+    return json_decode(curl_exec($curl), true);
 }
 
 function dump($var, $error_log=false){
@@ -127,7 +127,7 @@ function check_token($form_name, $token){
         $_SESSION[$key] = $tokens;
         return false;
     }
-    redirect(URL);
+    redirect();
 }
 
 function sha256($target) {
@@ -136,19 +136,19 @@ function sha256($target) {
 
 function now($format=false, $option = null){
     if($option === null){
-        $datetime = new DateTime('now',new DateTimeZone('GMT'));
-        return $format?$datetime->format('U'):$datetime;
+        $datetime = new DateTime('now', new DateTimeZone('GMT'));
+        return $format ? $datetime->format('U') : $datetime;
     }else{
-        $datetime = new DateTime($option,new DateTimeZone('GMT'));
-        return $format?$datetime->format('U'):$datetime;
+        $datetime = new DateTime($option, new DateTimeZone('GMT'));
+        return $format ? $datetime->format('U') : $datetime;
     }
 }
 
 function delete_null_byte($value){
     if(is_string($value) === true){
-        $value = str_replace("\0","",$value);
+        $value = str_replace("\0", '', $value);
     }else if(is_array($value) === true){
-        $value = array_map('delete_null_byte',$value);
+        $value = array_map('delete_null_byte', $value);
     }
     return $value;
 }

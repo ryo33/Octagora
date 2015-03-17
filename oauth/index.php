@@ -59,7 +59,6 @@ function oauth_redirect($uri, $params, $state=false){
 
 function get_app(){
     global $_SERVER, $client_id, $client_secret, $application;
-    //dump($_SERVER, true);
     if(isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])){
         $client_id = $_SERVER['PHP_AUTH_USER'];
         $client_secret = $_SERVER['PHP_AUTH_PW'];

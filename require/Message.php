@@ -4,10 +4,10 @@ class Message extends Model{
 
     const TAG_MAX = 256;
     const TEXT_MAX = 16384;
-    private $and = '*';
-    private $or = '.';
-    private $not = '!';
-    private $xor = '-';
+    static $and = '*';
+    static $or = '.';
+    static $not = '!';
+    static $xor = '-';
 
     function __construct($con){
         parent::__construct($con);
@@ -112,7 +112,7 @@ class Message extends Model{
                 if(count($types) === 0){
                     error(400, 'tag option');
                 }
-                $tags = $this->con->fetchAll('SELECT `tag`.`text`, `tag`.`type` FROM `tag` INNER JOIN `tagging` ON `tag`.`id` = `tagging`.`tag_id` WHERE `tagging`.`message_id` = ? AND `tag`.`type` in (\'' . implode('\', \'', $types) . '\') ORDER BY `tag`.`type`', $message['id']);
+                $tags = $this->con->fetchAll('SELECT `tag`.`text`, `tag`.`type` FROM `tag` INNER JOIN `tagging` ON `tag`.`id` = `tagging`.`tag_id` WHERE `tagging`.`message_id` = ? AND `tag`.`type` in (\'' . implode('\', \'', $types) . '\') ORDER BY `tagging`.`id`', $message['id']);
                 $json['ts'] = array();
                 foreach($tags as $tag){
                     $json['ts'][] = $tag['type'] === '0' ? $tag['text'] : $this->tag_types[$tag['type']] . ':' . $tag['text'];
@@ -175,7 +175,7 @@ class Message extends Model{
         $error = false;
         foreach($tokens as $token){
             if($before_is_and){
-                if($token === $this->and or $token === $this->or or $token === $this->xor or $token === $this->not or $token === '(' or $token === ')'){
+                if($token === self::$and or $token === self::$or or $token === self::$xor or $token === self::$not or $token === '(' or $token === ')'){
                     error(400, 'tags');
                     break;
                 }else{
@@ -186,7 +186,7 @@ class Message extends Model{
                 }
                 $before_is_and = false;
             }else{
-                if($token === $this->and){
+                if($token === self::$and){
                     $before_is_and = true;
                 }else{
                     error(400, 'tags');
@@ -259,29 +259,29 @@ class Message extends Model{
                 }
             }else{
                 if(!$before_escape){
-                    if($c === $this->and){
+                    if($c === self::$and){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = $this->and;
-                    }else if($c === $this->or){
+                        $result[] = self::$and;
+                    }else if($c === self::$or){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = ''; }
-                        $result[] = $this->or;
-                    }else if($c === $this->xor){
+                        $result[] = self::$or;
+                    }else if($c === self::$xor){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = $this->xor;
-                    }else if($c === $this->not){
+                        $result[] = self::$xor;
+                    }else if($c === self::$not){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
                             $tag = '';
                         }
-                        $result[] = $this->not;
+                        $result[] = self::$not;
                     }else if($c === '('){
                         if(strlen($tag) !== 0){
                             $result[] = $tag;
@@ -301,10 +301,10 @@ class Message extends Model{
                     }
                 }else{
                     switch($c){
-                    case $this->and:
-                    case $this->or:
-                    case $this->xor:
-                    case $this->not:
+                    case self::$and:
+                    case self::$or:
+                    case self::$xor:
+                    case self::$not:
                     case '(':
                     case ')':
                     case ':':
@@ -336,27 +336,27 @@ class Message extends Model{
         $last_is_tag = false;
         $last = '';
         foreach($tags as $i=>$tag){
-            if($tag === $this->and){
+            if($tag === self::$and){
                 if(!$last_is_tag and $last !== ')'){
                     error(400, 'tag');
                 }
                 $last_is_tag = false;
                 $last_is_not = false;
-            }else if($tag === $this->or){
-                if(!$last_is_tag and $last !== ')'){
-                    error(400, 'tag');
-                    return true;
-                }
-                $last_is_tag = false;
-                $last_is_not = false;
-            }else if($tag === $this->xor){
+            }else if($tag === self::$or){
                 if(!$last_is_tag and $last !== ')'){
                     error(400, 'tag');
                     return true;
                 }
                 $last_is_tag = false;
                 $last_is_not = false;
-            }else if($tag === $this->not){
+            }else if($tag === self::$xor){
+                if(!$last_is_tag and $last !== ')'){
+                    error(400, 'tag');
+                    return true;
+                }
+                $last_is_tag = false;
+                $last_is_not = false;
+            }else if($tag === self::$not){
                 if($last === ')'){
                     error(400, 'tag');
                     return true;
@@ -451,7 +451,7 @@ class Message extends Model{
             }
             break;
         case $this->tag_types_key['year']:
-            if(check_numeric($escaped_tag, 4)){
+            if(check_numeric($escaped_tag, 4, 2300, 2015)){
                 error(400, 'special tag year');
             }
             break;
@@ -502,38 +502,21 @@ class Message extends Model{
     function get_tags_where($tags){
         $result = '';
         $tag_ids = array();
-        $before_is_not = false;
-        $add_not = function()use(&$before_is_not, &$result){
-            if($before_is_not){
-                $before_is_not = false;
-                $result .= 'NOT ';
-            }
-        };
         foreach($tags as $tag){
-            if($tag === $this->or){
+            if($tag === self::$or){
                 $result .= ' OR ';
-                $add_not();
-            }else if($tag === $this->xor){
+            }else if($tag === self::$xor){
                 $result .= ' XOR ';
-                $add_not();
-            }else if($tag === $this->and){
+            }else if($tag === self::$and){
                 $result .= ' AND ';
-            }else if($tag === $this->not){
-                $add_not();
-                $before_is_not = true;
+            }else if($tag === self::$not){
+                $result .= 'NOT ';
             }else if($tag === '('){
                 $result .= '(';
-                $add_not();
             }else if($tag === ')'){
                 $result .= ')';
-                $add_not();
             }else{
-                if($before_is_not){
-                    $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` != ?)';
-                    $before_is_not = false;
-                }else{
-                    $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` = ?)';
-                }
+                $result .= '`id` IN (SELECT `message_id` FROM `tagging` WHERE `tag_id` = ?)';
                 $tag_ids[] = $tag;
             }
         }
@@ -553,7 +536,7 @@ class Message extends Model{
                 break;
             }
         }
-        $result = preg_replace('/\/([\\' . $this->and . '\\' . $this->or . '\\' . $this->not . '\(\)\/' . $this->xor . '])/', '$1', $result);
+        $result = preg_replace('/\/([\\' . self::$and . '\\' . self::$or . '\\' . self::$not . '\(\)\/' . self::$xor . '])/', '$1', $result);
         $result = str_replace('/:', ':', $result, $count);
         if(substr_count($result, ':') !== $count){
             error(400, 'tag escape \':\'');

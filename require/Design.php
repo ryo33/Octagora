@@ -3,24 +3,39 @@
 class Design{
 
     static $message_count = 0;
-    const show_tags = 'Show Tags';
-    const hide_tags = 'Hide Tags';
+    const show_tags = 'Show';
+    const hide_tags = 'Hide';
 
     static function message_panel($message, $source_data=[]){
+    $tag_class = 'uk-button uk-button-small uk-margin-small-bottom uk-margin-small-right';
         self::$message_count ++;
         $tags = '';
         if(count($message['ts']) > 0){
+            unset($source_data[FORM_TAGS]);
+            $source_data = '&' . http_build_query($source_data);
+            $tmp = '';
+            $buttons1 = ['to_message:' . $message['i'], 'message:' . $message['i']];
+            //post tags
+            foreach($buttons1 as $a){
+                $tmp .= Design::tag('a', 'POST ' . $a, ['class'=>'uk-button-primary ' . $tag_class, 'href'=>URL . '?' . POST_TAGS . '=' . $a . $source_data]); 
+            }
+            //form tags
+            foreach($buttons1 as $a){
+                $tmp .= Design::tag('a', $a, ['class'=>'uk-button-success ' . $tag_class, 'href'=>URL . '?' . FORM_TAGS . '=' . $a . $source_data]);
+            }
+            //tags
+            foreach($message['ts'] as $a){
+                $tmp .= Design::tag('a', $a, ['class'=>$tag_class, 'href'=>URL . '?' . FORM_TAGS . '=' . $a . $source_data]);
+            }
             $tags .= self::tag('div',
-                implode('', array_map(function($a){
-                    return Design::tag('a', $a, ['class'=>'uk-button uk-button-small', 'href'=>URL . '?' . 'ts=' . $a]);
-                }, $message['ts']))
+                $tmp
                     , ['id'=>'tag' . self::$message_count, 'style'=>'display: none;']) .
                     self::tag('button', self::show_tags, ['id'=>'message' . self::$message_count, 'class'=>'uk-button']);
         }
+        $relate = '';
         $result = self::tag('div',
-            //            Design::tag('h3', '') .
-            Design::tag('div', $message['t']) . $tags
-            , ['class'=>'uk-panel uk-panel-box uk-panel-box-hover']) .
+            Design::tag('div', $message['t']) . $tags . $relate
+            , ['class'=>'uk-panel uk-panel-box uk-panel-box-hover uk-margin-small']) .
             Script::switch_id('tag' . self::$message_count, 'message' . self::$message_count, self::show_tags, self::hide_tags, false);
         return $result;
     }
@@ -128,7 +143,7 @@ class Design{
     }
 
     static function form_start($form_name, $url, $method){
-        return '<form class="uk-panel uk-panel-box uk-form uk-container-center" action="' . URL . $url . '" method="' . $method . '">' . ($form_name === false ? '' : '<input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />');
+        return '<form class="uk-panel uk-panel-box uk-form uk-container-center uk-margin-small" action="' . URL . $url . '" method="' . $method . '">' . ($form_name === false ? '' : '<input type="hidden" name="' . TOKEN . '" value="' . get_token($form_name) . '" />');
     }
 
     static function form_end(){

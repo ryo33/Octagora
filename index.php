@@ -41,6 +41,9 @@ define('TOKEN', '_Token');
 define('AUTO_LOGIN', 'remember');
 define('DEBUG', false);
 
+define('FORM_TAGS', 'form_tags');
+define('POST_TAGS', 'post_tags');
+
 $con = new EasySql($database_dsn, $database_username, $database_password);
 $req = new Request();
 $res = new Response();

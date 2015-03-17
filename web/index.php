@@ -32,15 +32,16 @@ case 'users':
         $token = $req->get_param(TOKEN, '');
         if($action === false){//login
             do_login($se, $req, $user, $token);
-            redirect(URL);
+            redirect();
         }else if($action === 'new'){//signup
             check_token('signup', $token);
             $result = $user->add_user(['name'=>$req->get_param('name', ''), 'name2'=>$req->get_param('name2', ''), 'password'=>$req->get_param('password', ''), 'password2'=>$req->get_param('password2', '')]);
+            dump($result, true);
             if($result[0] !== false){
                 redirect('users?action=new&message=' . $result[1]);
             }
             $se->login($result[1]);
-            redirect(URL);
+            redirect();
         }else{
             error(400, ACTION);
         }
