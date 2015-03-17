@@ -159,7 +159,7 @@ class Message extends Model{
             error(400, 'message_id');
         }
         $json['data-count'] = 1;
-        $this->format_message($json['message'], $message, $needs, $tso);
+        $this->format_message($json, $message, $needs, $tso);
     }
 
     function post_message(&$json, $ts, $text, $auth_info){
