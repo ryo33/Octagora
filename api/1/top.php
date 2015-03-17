@@ -31,7 +31,7 @@ $tmpl->add(
                     ) . Design::tag('p', 'Example: curl "https://octagora.com/api/1/messages?access_token=ACCESS_TOKEN&ts=dog.cat"')
                 ) .
                 Design::tag(['li', 'div'],
-                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get a Message' . Design::tag('span', '/USER_ID', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
+                    Design::tag('h4', Design::tag('span', 'GET', ['class'=>'uk-badge uk-badge-success uk-text-large', 'style'=>'margin-right: 5px']) . 'Get a Message' . Design::tag('span', '/MESSAGE_ID', ['class'=>'uk-badge uk-badge-primary uk-text-large', 'style'=>'margin-left: 5px;'])) .
                     Design::table(['Parameter', 'Required', 'Description', 'Default'],
                         [
                             ['access_token', $required, Design::link('api/1#oauth', 'Detail'), '-'],
