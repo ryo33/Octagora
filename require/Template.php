@@ -62,7 +62,7 @@ DESC;
 <div class="uk-container uk-container-center uk-margin-top uk-margin-large-botoom">
 <nav class="uk-navbar uk-margin-large-bottom">
     <ul class="uk-navbar-nav">
-        <li><a class="uk-navbar-brand" href="{$_(URL)}" style="padding-left: 0px; padding-right: 0px;"><img src="{$_(URL)}icon/favicon-128.png" style="height: 100%; vertical-align: top; " /></a></li><li><a href="{$_(URL)}">Octagora</a></li>
+        <li><a class="uk-navbar-brand" href="{$_(URL)}" style="padding-left: 0px; padding-right: 0px;"><img src="{$_(URL)}icon/favicon-128.png" style="height: 100%; vertical-align: top; " /></a></li><li><a href="{$_(URL)}messages">Octagora</a></li>
         <li><a href="{$_(URL)}api">API</a></li>
     {$this->navbar}
     </ul>
