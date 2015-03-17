@@ -35,7 +35,7 @@ class Design{
         $relate = '';
         $result = self::tag('div',
             Design::tag('div', $message['t']) . $tags . $relate
-            , ['class'=>'uk-panel uk-panel-box uk-panel-box-hover uk-margin-small']) .
+            , ['class'=>'uk-panel uk-panel-box' . (isset($message['class']) ? ' ' . $message['class'] : '') . ' uk-margin-small']) .
             Script::switch_id('tag' . self::$message_count, 'message' . self::$message_count, self::show_tags, self::hide_tags, false);
         return $result;
     }

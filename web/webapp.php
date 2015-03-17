@@ -16,17 +16,16 @@ if($req->request_method ===  Request::GET){
     $tags_form = [
         'name'=>'tags',
         'type'=>'text',
+        'placeholder'=>'Tags'
     ];
-    if($tags === ''){
-        $tags_form['placeholder'] = 'Tags';
-    }else{
-        $tags_form['value'] = $req->get_param(POST_TAGS, '');
+    if(($post_tags = $req->get_param(POST_TAGS, '')) !== ''){
+        $tags_form['value'] = $post_tags;
     }
 
     $tmpl->add(
         Design::form_start(false, '', 'GET') .
-        Design::tag('input', '', ['id'=>'reloadform', 'name'=>FORM_TAGS, 'class'=>'uk-form uk-form-large uk-width-5-6', 'style'=>'height: 100%;', 'value'=>$ts]) .
-        Design::tag('button', 'Reload', ['id'=>'reload', 'type'=>'submit', 'class'=>'uk-button uk-button-large uk-button-success uk-width-1-6 uk-vertical-align-middle', 'style'=>'height: 100%;']) .
+        Design::tag('div', Design::tag('div', Design::tag('input', '', ['id'=>'reloadform', 'name'=>FORM_TAGS, 'class'=>'uk-form uk-form-large', 'style'=>'height: 100%; width: 100%;', 'value'=>$ts, 'placeholder'=>'Tags']), ['style'=>'margin-right: 100px;']), ['style'=>'float: left; width: 100%; margin-right: -100px;']) .
+        Design::tag('button', 'Reload', ['id'=>'reload', 'type'=>'submit', 'class'=>'uk-button uk-button-large uk-button-success uk-vertical-align-middle', 'style'=>'height: 100%; float: right; width: 100px;']) .
         Design::form_end()
     );
 
@@ -48,7 +47,8 @@ if($req->request_method ===  Request::GET){
             Design::form_end() .
             Script::switch_id('postform', 'displaypostform', $show, $hide, $postform === 'true')
         );
-    $tmpl->add(get_messages(get_access_token(), $request_data));
+    $access_token = get_access_token();
+    $tmpl->add(get_messages($access_token, $request_data));
 }else{
     check_token('post', $req->get_param(TOKEN, ''));
     $message = $req->get_param('text', '');
